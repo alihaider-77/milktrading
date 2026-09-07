@@ -1,255 +1,396 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Waseela Milk Exchange — Trading Desk</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>Waseela Milk Exchange — Trading Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{
- --bg:#0B0E11; --panel:#141A21; --panel2:#1B232C; --line:#232D38; --ink:#E8EDF2; --mut:#7C8B9A;
- --up:#00C805; --down:#FF4D4D; --amber:#F5A623; --accent:#00C805; --blue:#2F80ED; --gold:#E9B949;
+ --bg:#08090A; --panel:#0E0F11; --panel2:#17181B; --line:#212226; --ink:#F7F8F8; --mut:#8A8F98;
+ --up:#4CB782; --down:#EB5757; --amber:#F2C94C; --accent:#5E6AD2; --accent2:#828FFF; --gold:#E9B949;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-.mono{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
-a{color:inherit;text-decoration:none}
-/* top bar */
-.top{display:flex;align-items:center;gap:22px;padding:12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,14,17,.92);backdrop-filter:blur(8px);z-index:30}
-.brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.02em;font-size:16px}
-.brand .dot{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--up),#0a8f04);display:flex;align-items:center;justify-content:center;font-size:13px}
-.nav{display:flex;gap:4px}
-.nav button{background:none;border:none;color:var(--mut);font-size:13.5px;font-weight:600;padding:8px 13px;border-radius:8px;cursor:pointer}
-.nav button.on{color:var(--ink);background:var(--panel2)}
-.top .right{margin-left:auto;display:flex;align-items:center;gap:14px;color:var(--mut);font-size:12.5px}
-.livedot{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 8px var(--up);animation:pulse 1.6s infinite}
-@keyframes pulse{50%{opacity:.4}}
-/* ticker */
-.ticker{display:flex;gap:0;border-bottom:1px solid var(--line);overflow-x:auto;background:var(--panel)}
-.ticker .t{flex:1;min-width:200px;padding:10px 16px;border-right:1px solid var(--line);cursor:pointer}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.011em;font-size:14px}
+.mono{font-family:"SF Mono",ui-monospace,"Roboto Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;letter-spacing:0}
+.up{color:var(--up)} .down{color:var(--down)} .muted{color:var(--mut)}
+.app{display:flex;min-height:100vh}
+.side{width:220px;flex-shrink:0;background:var(--bg);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;overflow:auto;padding:14px 8px;transition:width .16s}
+.side.collapsed{width:58px}
+.side .brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px;padding:2px 8px}
+.side .brand .dot{width:22px;height:22px;border-radius:6px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.side.collapsed .lbl{display:none}
+.collapse{background:none;border:1px solid var(--line);color:var(--mut);border-radius:7px;padding:6px;cursor:pointer;font-size:13px;width:100%;margin-top:12px}
+.collapse:hover{background:var(--panel2);color:var(--ink)}
+#nav{display:flex;flex-direction:column;gap:1px;margin-top:12px}
+#nav button{display:flex;align-items:center;gap:10px;background:none;border:none;color:var(--mut);font-size:13px;font-weight:500;padding:7px 9px;border-radius:6px;cursor:pointer;text-align:left;width:100%}
+#nav button.on,#nav button:hover{background:var(--panel2);color:var(--ink)}
+#nav .ic{width:18px;text-align:center;font-size:14px;flex-shrink:0;opacity:.85}
+.side.collapsed #nav button{justify-content:center;padding:8px 0}
+.navdiv{height:1px;background:var(--line);margin:10px 8px}
+.navlbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;padding:10px 10px 3px;font-weight:600;opacity:.7}
+.side.collapsed .navlbl{text-align:center;font-size:8px}
+.main{flex:1;min-width:0}
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(8,9,10,.86);backdrop-filter:blur(12px);z-index:20}
+.topbar .ttl{font-weight:600;font-size:15px}
+.topbar .sub{color:var(--mut);font-size:12px;font-weight:400}
+.topbar .right{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px}
+.livedot{width:7px;height:7px;border-radius:50%;background:var(--up);box-shadow:0 0 7px var(--up);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.wrap{padding:18px 22px 70px;max-width:1320px}
+.ticker{display:flex;gap:0;overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.ticker .t{flex:1;min-width:158px;padding:10px 14px;border-right:1px solid var(--line);cursor:pointer}
+.ticker .t:last-child{border-right:none}
 .ticker .t:hover{background:var(--panel2)}
-.ticker .t.sel{background:var(--panel2);box-shadow:inset 3px 0 0 var(--up)}
-.ticker .t .n{font-size:11.5px;color:var(--mut);font-weight:600;display:flex;justify-content:space-between}
-.ticker .t .p{font-size:19px;font-weight:800;margin-top:2px}
-.ticker .t .c{font-size:12px;font-weight:700}
-.up{color:var(--up)} .down{color:var(--down)}
-.wrap{max-width:1280px;margin:0 auto;padding:18px 20px 80px}
-.grid{display:grid;gap:16px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
-.card h3{margin:0 0 2px;font-size:13px;color:var(--mut);font-weight:600;letter-spacing:.02em;text-transform:uppercase}
-.big{font-size:34px;font-weight:800;letter-spacing:-.02em}
+.ticker .t.sel{background:var(--panel2);box-shadow:inset 2px 0 0 var(--accent)}
+.ticker .t .n{font-size:11px;color:var(--mut);font-weight:500;display:flex;justify-content:space-between;gap:8px}
+.ticker .t .p{font-size:17px;font-weight:600;margin-top:3px}
+.ticker .t .c{font-size:11.5px;font-weight:600;margin-top:1px}
+.grid{display:grid;gap:12px}
+.grid.two{grid-template-columns:1fr 1fr}
+@media(max-width:1050px){.grid.two{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px}
+.card h3{margin:0 0 2px;font-size:11.5px;color:var(--mut);font-weight:500;letter-spacing:.01em}
+.big{font-size:27px;font-weight:600;letter-spacing:-.02em}
+.hero{border:1px solid var(--line);border-radius:10px;padding:18px 20px;background:var(--panel);position:relative}
+.hero.buy{border-left:2px solid var(--up)} .hero.sell{border-left:2px solid var(--accent)}
+.hero .lab{font-size:12px;color:var(--mut);font-weight:500}
+.hero .num{font-size:40px;font-weight:600;letter-spacing:-.03em;margin-top:2px}
+.hero .meta{font-size:12.5px;color:var(--mut);margin-top:4px}
 .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.seg{display:inline-flex;background:var(--panel2);border-radius:9px;padding:3px;gap:2px}
-.seg button{background:none;border:none;color:var(--mut);font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:7px;cursor:pointer}
-.seg button.on{background:#2A3542;color:var(--ink)}
-.muted{color:var(--mut)}
+.seg{display:inline-flex;background:var(--panel2);border-radius:7px;padding:2px;gap:1px;border:1px solid var(--line)}
+.seg button{background:none;border:none;color:var(--mut);font-size:12.5px;font-weight:500;padding:5px 11px;border-radius:5px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;color:var(--mut);font-weight:600;font-size:11.5px;padding:8px 10px;border-bottom:1px solid var(--line)}
-td{padding:9px 10px;border-bottom:1px solid var(--line)}
+th{text-align:left;color:var(--mut);font-weight:500;font-size:11px;padding:8px 9px;border-bottom:1px solid var(--line)}
+td{padding:9px 9px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--panel2)}
-.pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
-.pill.buf{background:#3a2a05;color:var(--gold)} .pill.cow{background:#0a2a3a;color:#5ad0ff} .pill.mix{background:#1a2a1a;color:#8bd88b}
-input,select{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:9px 11px;font-size:14px;font-family:inherit;width:100%}
-label{font-size:11.5px;color:var(--mut);font-weight:600;display:block;margin-bottom:5px}
-.btn{background:var(--up);color:#042d02;border:none;border-radius:10px;padding:11px 16px;font-weight:800;font-size:14px;cursor:pointer}
+.pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px}
+input,select{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:8px 10px;font-size:13.5px;font-family:inherit;width:100%}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+input[type=checkbox]{width:auto;accent-color:var(--accent);margin:0 6px 0 0;vertical-align:-1px}
+.chk{display:inline-flex;align-items:center;font-size:12.5px;color:var(--ink);font-weight:500;cursor:pointer;user-select:none}
+label{font-size:11px;color:var(--mut);font-weight:500;display:block;margin-bottom:5px}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:9px 15px;font-weight:600;font-size:13.5px;cursor:pointer;width:100%}
+.btn:hover{background:var(--accent2)}
 .btn.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
 .hide{display:none}
-.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:1050px){.kpi{grid-template-columns:1fr}}
 .kpi .card{padding:13px 15px}
-.stack .ln{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
-.stack .ln.tot{border-bottom:none;font-weight:800;font-size:16px;padding-top:12px}
-.bar{height:9px;border-radius:6px;background:var(--panel2);overflow:hidden}
-.bar>span{display:block;height:100%;border-radius:6px}
-.note{font-size:11.5px;color:var(--mut)}
-h2.sec{font-size:15px;margin:22px 0 10px;letter-spacing:-.01em}
-.badge{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:6px;background:#0a2a3a;color:#5ad0ff}
-.footer{margin-top:26px;color:var(--mut);font-size:11.5px;border-top:1px solid var(--line);padding-top:12px}
-.map{height:420px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0f151b}
-.leaflet-container{background:#0f151b}
-.leaflet-tooltip.mtip{background:#0B0E11;border:1px solid var(--up);color:var(--ink);font-weight:700;font-size:12.5px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.5)}
-.leaflet-tooltip.mtip .sm{color:var(--mut);font-weight:500;font-size:11px}
-.legend{display:flex;gap:14px;align-items:center;font-size:11.5px;color:var(--mut);margin-top:8px}
-.legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.stack .ln{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.stack .ln.tot{border-bottom:none;font-weight:600;font-size:15px;padding-top:11px}
+.bar{height:7px;border-radius:5px;background:var(--panel2);overflow:hidden}
+.bar>span{display:block;height:100%;border-radius:5px}
+.note{font-size:11.5px;color:var(--mut);line-height:1.5}
+.badge{font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;background:rgba(94,106,210,.16);color:var(--accent2)}
+.verdict{margin-top:10px;text-align:center;font-weight:600;font-size:13px;padding:9px;border-radius:7px}
+.deal{margin-top:12px;border-radius:10px;padding:14px;text-align:center;border:1px solid var(--line)}
+.deal .dl{font-size:21px;font-weight:700;letter-spacing:-.01em}
+.deal .dm{font-size:12.5px;margin-top:4px;font-weight:500;opacity:.95}
+.deal.good{background:rgba(76,183,130,.13);border-color:rgba(76,183,130,.5);color:var(--up)}
+.deal.bad{background:rgba(235,87,87,.15);border-color:rgba(235,87,87,.5);color:var(--down)}
+.deal.ok{background:rgba(242,201,76,.13);border-color:rgba(242,201,76,.45);color:var(--amber)}
+.sugg{margin-top:9px;font-size:12px;color:var(--mut);line-height:1.65}
+.sugg b{color:var(--ink);font-weight:600}
+#nav .ic svg,.brand .dot svg,.collapse svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
+.brand .dot svg{width:13px;height:13px;stroke:#fff}
+.collapse svg{width:15px;height:15px;margin:0 auto}
+.map{border-radius:8px;overflow:hidden;border:1px solid var(--line);background:#0c0d0f}
+.leaflet-container{background:#0c0d0f}
+.leaflet-tooltip.mtip{background:#0E0F11;border:1px solid var(--accent);color:var(--ink);font-weight:500;font-size:12.5px;border-radius:7px;box-shadow:0 6px 20px rgba(0,0,0,.55)}
+.leaflet-tooltip.mtip .sm{color:var(--mut);font-weight:400;font-size:11px}
+.legend{display:flex;gap:13px;align-items:center;font-size:11.5px;color:var(--mut);margin-top:8px;flex-wrap:wrap}
+.legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.footer{margin-top:24px;color:var(--mut);font-size:11.5px;border-top:1px solid var(--line);padding-top:12px}
 </style></head>
 <body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand"><span class="dot"><svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span><span class="lbl">Waseela <span class="muted" style="font-weight:600">Exchange</span></span></div>
+    <button class="collapse" onclick="toggleSide()"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></button>
+    <div class="navlbl">Desks</div>
+    <div id="nav">
+      <button data-tab="buy" class="on"><span class="ic"><svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></span><span class="lbl">Buying Desk</span></button>
+      <button data-tab="sell"><span class="ic"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span><span class="lbl">Sales Desk</span></button>
+      <div class="navlbl lbl">Tools</div>
+      <button data-tab="post"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><span class="lbl">Post Market Price</span></button>
+      <button data-tab="cost"><span class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11.01"/><line x1="12" y1="11" x2="12" y2="11.01"/><line x1="16" y1="11" x2="16" y2="11.01"/><line x1="8" y1="15" x2="8" y2="15.01"/><line x1="12" y1="15" x2="12" y2="15.01"/><line x1="16" y1="15" x2="16" y2="18.01"/></svg></span><span class="lbl">Landed Cost</span></button>
+      <button data-tab="deal"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12.59 2.59A2 2 0 0 0 11.17 2H4a2 2 0 0 0-2 2v7.17a2 2 0 0 0 .59 1.41l8.7 8.7a2.43 2.43 0 0 0 3.42 0l6.58-6.58a2.43 2.43 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg></span><span class="lbl">Deal Desk</span></button>
+      <div class="navdiv"></div>
+      <button data-tab="admin"><span class="ic"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="18" r="2"/></svg></span><span class="lbl">Admin</span></button>
+    </div>
+  </aside>
 
-<div class="top">
-  <div class="brand"><span class="dot">🥛</span> Waseela <span style="color:var(--mut);font-weight:600">Milk Exchange</span></div>
-  <div class="nav" id="nav">
-    <button data-tab="market" class="on">Buying Index</button>
-    <button data-tab="cost">Landed Cost</button>
-    <button data-tab="deal">Deal Desk</button>
-  </div>
-  <div class="right"><span class="livedot"></span> Live · agents online <b style="color:var(--ink)">7</b> <span>· 22 Aug 2026</span></div>
-</div>
+  <div class="main">
+    <div class="topbar">
+      <div><div class="ttl" id="ttl">Buying Desk</div><div class="sub" id="sub">One number: the company all-milk 30-day rolling buying price</div></div>
+      <div class="right"><span class="livedot"></span> Live · agents <b style="color:var(--ink)">7</b> <span>· 22 Aug 2026</span></div>
+    </div>
+    <div class="wrap">
 
-<div class="ticker" id="ticker"></div>
+    <!-- ============ BUYING DESK ============ -->
+    <div id="tab-buy" class="tabpane">
+      <div class="hero buy">
+        <div class="lab">Company all-milk · 30-day rolling BUYING price / litre <span class="badge" id="fltTagBuy">All milk</span></div>
+        <div class="num mono" id="buyHero">Rs —</div>
+        <div class="meta" id="buyHeroMeta"></div>
+      </div>
+      <div class="row" style="justify-content:space-between;margin-top:14px">
+        <div class="row" style="gap:8px"><span class="note">Break down by</span><div class="seg" id="fltBuy"><button data-f="All" class="on">All milk</button><button data-f="Buffalo">Buffalo</button><button data-f="Cow">Cow</button><button data-f="Mix">Mix</button></div></div>
+        <div class="note">Raw ERP pickup price · volume-weighted</div>
+      </div>
+      <div class="ticker" id="bTicker" style="margin-top:12px"></div>
+      <div class="kpi" id="deskKpi" style="margin-top:12px"></div>
 
-<div class="wrap">
+      <div class="grid two" style="margin-top:12px">
+        <div class="card">
+          <div><h3>30-day rolling buying price — company &amp; by centre</h3><div class="note">Company average (thick) vs each centre. Lower is better.</div></div>
+          <canvas id="deskChart" height="150" style="margin-top:8px"></canvas>
+          <div class="row" id="deskCenters" style="gap:6px;margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <h3>Buying calculator <span class="badge">SIMULATE</span></h3>
+          <div class="note" style="margin-top:2px">Does this lot push the company 30-day average up or down? Built on the <b>raw</b> price.</div>
+          <div class="row" style="gap:8px;margin-top:10px">
+            <div style="flex:1.4"><label>Centre</label><select id="bkCenter" onchange="calcBuy()"></select></div>
+            <div style="flex:1"><label>Raw price (Rs/L)</label><input id="bkPrice" class="mono" value="200" oninput="calcBuy()"></div>
+            <div style="flex:1"><label>Volume (L)</label><input id="bkVol" class="mono" value="8000" oninput="calcBuy()"></div>
+          </div>
+          <div class="row" style="gap:16px;margin-top:10px">
+            <label class="chk"><input type="checkbox" id="bkOpex" onchange="calcBuy()"> + OpEx (centre)</label>
+            <label class="chk"><input type="checkbox" id="bkLogi" onchange="calcBuy()"> + Logistics</label>
+            <input id="bkLogiVal" class="mono" style="width:120px" value="0" placeholder="Rs/L" oninput="calcBuy()">
+          </div>
+          <div class="stack" id="bkStack" style="margin-top:10px"></div>
+          <div id="bkVerdict"></div>
+          <div class="sugg" id="bkSugg"></div>
+        </div>
+      </div>
 
-<!-- ================= MARKET / BUYING INDEX ================= -->
-<div id="tab-market" class="tabpane">
-  <div class="grid" style="grid-template-columns:1fr 1fr">
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <div>
-          <h3 id="chTitle">MCC Bhawana · Buffalo</h3>
-          <div class="row" style="gap:12px;align-items:baseline">
-            <div class="big mono" id="chPrice">Rs 200</div>
-            <div id="chChg" class="up" style="font-weight:800">▲ 2.6% (Rs 5)</div>
-            <div class="muted" style="font-size:12px">/ litre · buying</div>
+      <div class="grid two" style="margin-top:12px">
+        <div class="card">
+          <h3>Collection centres <span class="muted" style="font-weight:400">— 7/14/30d rolling, lowest = best</span></h3>
+          <table><thead><tr><th>#</th><th>Centre</th><th>7d</th><th>14d</th><th>30d</th><th>Margin</th><th></th></tr></thead><tbody id="deskTable"></tbody></table>
+        </div>
+        <div class="card">
+          <h3>Spread vs market <span class="muted" style="font-weight:400">— furthest below market wins</span></h3>
+          <table><thead><tr><th>#</th><th>Centre</th><th>Our</th><th>Market</th><th>Spread</th><th></th></tr></thead><tbody id="spreadBody"></tbody></table>
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-top:12px">
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <div><h3 id="chTitle">Bhawana</h3><div class="row" style="gap:10px;align-items:baseline"><div class="big mono" id="chPrice">Rs —</div><div id="chChg" class="up" style="font-weight:600">▲</div></div></div>
+            <div class="seg" id="tf"><button data-d="14">14D</button><button data-d="30" class="on">30D</button><button data-d="90">90D</button></div>
+          </div>
+          <canvas id="priceChart" height="140" style="margin-top:8px"></canvas>
+          <div class="note" style="margin-top:6px">Our raw pickup (ERP) vs market (agent-posted). Click a centre in the ticker.</div>
+        </div>
+        <div class="card">
+          <div><h3>Buying price map</h3><div class="note">Hover a centre for our vs market price.</div></div>
+          <div id="buyMap" class="map" style="height:280px;margin-top:8px"></div>
+          <div class="legend"><span><span class="sw" style="background:#4CB782"></span>cheaper</span><span><span class="sw" style="background:#F2C94C"></span>mid</span><span><span class="sw" style="background:#EB5757"></span>pricier</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SALES DESK ============ -->
+    <div id="tab-sell" class="tabpane hide">
+      <div class="hero sell">
+        <div class="lab">Company all-milk · 30-day rolling SELLING price / litre <span class="badge" id="fltTagSell">All milk</span></div>
+        <div class="num mono" id="sellHero">Rs —</div>
+        <div class="meta" id="sellHeroMeta"></div>
+      </div>
+      <div class="row" style="justify-content:space-between;margin-top:14px">
+        <div class="row" style="gap:8px"><span class="note">Break down by</span><div class="seg" id="fltSell"><button data-f="All" class="on">All milk</button><button data-f="Buffalo">Buffalo</button><button data-f="Cow">Cow</button><button data-f="Mix">Mix</button></div></div>
+        <div class="note">Where we sell &amp; at what price · volume-weighted</div>
+      </div>
+      <div class="ticker" id="sTicker" style="margin-top:12px"></div>
+      <div class="kpi" id="sellKpi" style="margin-top:12px"></div>
+
+      <div class="grid two" style="margin-top:12px">
+        <div class="card">
+          <div><h3>30-day rolling selling price — company &amp; by market</h3><div class="note">Company average (thick) vs each market. Higher is better.</div></div>
+          <canvas id="sellChart" height="150" style="margin-top:8px"></canvas>
+          <div class="row" id="sellCenters" style="gap:6px;margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <h3>Selling calculator <span class="badge">SIMULATE</span></h3>
+          <div class="note" style="margin-top:2px">Does this sale push the company 30-day selling average up? And what does it cost to source?</div>
+          <div class="row" style="gap:8px;margin-top:10px">
+            <div style="flex:1.4"><label>Market</label><select id="skMarket" onchange="onMarketChange()"></select></div>
+            <div style="flex:1"><label>Sale price (Rs/L)</label><input id="skPrice" class="mono" value="266" oninput="calcSell()"></div>
+            <div style="flex:1"><label>Volume (L)</label><input id="skVol" class="mono" value="6000" oninput="calcSell()"></div>
+          </div>
+          <div class="row" style="gap:16px;margin-top:10px">
+            <label class="chk"><input type="checkbox" id="skOpex" onchange="calcSell()"> + OpEx (centre)</label>
+            <label class="chk"><input type="checkbox" id="skLogi" onchange="calcSell()"> + Logistics to market</label>
+            <input id="skLogiVal" class="mono" style="width:120px" value="14" placeholder="Rs/L" oninput="calcSell()">
+          </div>
+          <div class="stack" id="skStack" style="margin-top:10px"></div>
+          <div id="skVerdict"></div>
+          <div class="sugg" id="skSugg"></div>
+          <h3 style="margin-top:14px">Cheapest to source from <span class="muted" style="font-weight:400">— cost by centre, best margin first</span></h3>
+          <table style="margin-top:6px"><thead><tr><th>#</th><th>Centre</th><th>Source cost</th><th>Margin/L</th><th></th></tr></thead><tbody id="srcBody"></tbody></table>
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-top:12px">
+        <div class="card">
+          <h3>Markets <span class="muted" style="font-weight:400">— 7/14/30d rolling sell, highest = best</span></h3>
+          <table><thead><tr><th>#</th><th>Market</th><th>7d</th><th>14d</th><th>30d</th><th>Margin</th><th></th></tr></thead><tbody id="sellTable"></tbody></table>
+        </div>
+        <div class="card">
+          <div><h3>Selling price map</h3><div class="note">Markets coloured by 30d rolling sell — higher is greener.</div></div>
+          <div id="saleMap" class="map" style="height:300px;margin-top:8px"></div>
+          <div class="legend"><span><span class="sw" style="background:#EB5757"></span>lower</span><span><span class="sw" style="background:#F2C94C"></span>mid</span><span><span class="sw" style="background:#4CB782"></span>higher (better)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ POST MARKET PRICE ============ -->
+    <div id="tab-post" class="tabpane hide">
+      <div class="grid two">
+        <div class="card">
+          <h3>Post market price <span class="badge">AGENT</span></h3>
+          <div class="grid" style="gap:10px;margin-top:8px">
+            <div><label>Centre</label><select id="pc"></select></div>
+            <div class="row" style="gap:10px">
+              <div style="flex:1"><label>Milk type</label><select id="pt"><option>Buffalo</option><option>Cow</option><option>Mix</option></select></div>
+              <div style="flex:1"><label>Date</label><input id="pd" value="22 Aug 2026"></div>
+            </div>
+            <div class="row" style="gap:10px">
+              <div style="flex:1"><label>Market price (Rs/L)</label><input id="pp" class="mono" value="205"></div>
+              <div style="flex:1"><label>Fat % <span class="muted">(opt)</span></label><input id="pf" class="mono" value="6.0"></div>
+            </div>
+            <button class="btn" onclick="postPrice()">Post market price</button>
+            <div class="note">Agents log the market buying price. Our own price comes from the ERP.</div>
           </div>
         </div>
-        <div class="seg" id="tf"><button data-d="14">14D</button><button data-d="30" class="on">30D</button><button data-d="90">90D</button></div>
-      </div>
-      <canvas id="priceChart" height="150" style="margin-top:8px"></canvas>
-      <div class="row" style="margin-top:8px;justify-content:space-between">
-        <div class="seg" id="typeSel">
-          <button data-t="Buffalo" class="on">Buffalo</button><button data-t="Cow">Cow</button><button data-t="Mix">Mix</button>
-        </div>
-        <div class="note">Type applies to graph &amp; map</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div><h3>Buying price map · Pakistan</h3><div class="note">Hover a center for its live buying price. 4 centers now — expands countrywide.</div></div>
-      <div id="buyMap" class="map" style="height:300px;margin-top:8px"></div>
-      <div class="legend"><span><span class="sw" style="background:#00C805"></span>cheaper (better)</span><span><span class="sw" style="background:#F5A623"></span>mid</span><span><span class="sw" style="background:#FF4D4D"></span>pricier</span><span class="muted">· bubble size = volume</span></div>
-    </div>
-  </div>
-
-  <div class="kpi" style="margin-top:16px" id="marketKpi"></div>
-
-  <div class="card" style="margin-top:16px">
-    <h3>Spread vs market · all centers <span class="muted" style="font-weight:400;font-size:12px">— who's buying furthest below market</span></h3>
-    <table><thead><tr><th>#</th><th>Center</th><th>Our · ERP</th><th>Market</th><th>Spread</th><th></th></tr></thead>
-    <tbody id="spreadBody"></tbody></table>
-  </div>
-
-  <div class="grid" style="grid-template-columns:1fr 1.5fr;margin-top:16px">
-    <div class="card">
-      <h3>Post market price <span class="badge">AGENT</span></h3>
-      <div class="grid" style="gap:10px;margin-top:8px">
-        <div><label>Center</label><select id="pc"></select></div>
-        <div class="row" style="gap:10px">
-          <div style="flex:1"><label>Milk type</label><select id="pt"><option>Buffalo</option><option>Cow</option><option>Mix</option></select></div>
-          <div style="flex:1"><label>Date</label><input id="pd" value="22 Aug 2026"></div>
-        </div>
-        <div class="row" style="gap:10px">
-          <div style="flex:1"><label>Market price (Rs/L)</label><input id="pp" class="mono" value="205"></div>
-          <div style="flex:1"><label>Fat % <span class="muted">(opt)</span></label><input id="pf" class="mono" value="6.0"></div>
-        </div>
-        <button class="btn" onclick="postPrice()">Post market price</button>
-        <div class="note">Agents log the <b>market</b> buying price. Our own price comes from the ERP — the chart overlays both so you see the spread live.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>Recent market prices <span class="muted" style="font-weight:400;font-size:12px">· agent-posted</span></h3>
-      <table><thead><tr><th>Date</th><th>Center</th><th>Type</th><th>Market Rs/L</th><th>Fat %</th><th>Agent</th></tr></thead>
-      <tbody id="dpBody"></tbody></table>
-    </div>
-  </div>
-
-</div>
-
-<!-- ================= LANDED COST ================= -->
-<div id="tab-cost" class="tabpane hide">
-  <div class="row" style="justify-content:space-between;margin-bottom:4px">
-    <div class="seg" id="costCenter"></div>
-    <div class="note">Landed cost = buying price + Opex 1 (GL ÷ litres) + Opex 2 (extra lines)</div>
-  </div>
-  <div class="grid" style="grid-template-columns:1.3fr 1fr;margin-top:8px">
-    <div class="card">
-      <h3 id="costTitle">MCC Bhawana · cost to serve</h3>
-      <div class="stack" id="costStack" style="margin-top:8px"></div>
-    </div>
-    <div class="card">
-      <h3>Cost inputs</h3>
-      <div style="margin-top:10px">
-        <div class="row" style="justify-content:space-between"><span class="muted">GL opex this month</span><b class="mono" id="glOpex">Rs 1,240,000</b></div>
-        <div class="row" style="justify-content:space-between"><span class="muted">Litres collected (month)</span><b class="mono" id="glVol">62,000 L</b></div>
-        <div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-top:8px;margin-top:8px"><span class="muted">Opex per litre (auto)</span><b class="mono up" id="glPerL">Rs 20.0</b></div>
-        <div class="note" style="margin-top:6px">Pulled from the General Ledger by cost center. Drops as volume rises.</div>
-      </div>
-      <h3 style="margin-top:18px">Opex 2 · extra cost lines</h3>
-      <div id="customLines" style="margin-top:6px"></div>
-      <div class="row" style="gap:8px;margin-top:8px">
-        <input id="clLabel" placeholder="e.g. Chilling" style="flex:2">
-        <input id="clVal" class="mono" placeholder="Rs/L" style="flex:1">
-        <button class="btn ghost" onclick="addLine()">Add</button>
-      </div>
-    </div>
-  </div>
-  <div class="card" style="margin-top:16px">
-    <h3>Cost to serve — all centers (Rs / litre)</h3>
-    <table><thead><tr><th>Center</th><th>Buying</th><th>Opex/L</th><th>Opex 2</th><th>Landed cost</th><th></th></tr></thead>
-    <tbody id="costTable"></tbody></table>
-  </div>
-</div>
-
-<!-- ================= DEAL DESK ================= -->
-<div id="tab-deal" class="tabpane hide">
-  <div class="grid" style="grid-template-columns:1fr 1fr">
-    <div class="card">
-      <div><h3>Margin by city <span class="muted" style="font-weight:400;font-size:12px">— after logistics</span></h3><div class="note">Delivered margin from your source center to each city. Tallest = best place to sell.</div></div>
-      <canvas id="cityChart" height="150" style="margin-top:8px"></canvas>
-    </div>
-    <div class="card">
-      <div><h3>Delivery margin map</h3><div class="note">Cities colored by delivered margin from <b id="srcName">MCC Bhawana</b>. Hover for the full breakdown.</div></div>
-      <div id="sellMap" class="map" style="height:310px;margin-top:8px"></div>
-      <div class="legend"><span><span class="sw" style="background:#FF4D4D"></span>thin margin</span><span><span class="sw" style="background:#F5A623"></span>mid</span><span><span class="sw" style="background:#00C805"></span>best margin</span><span class="muted">· bubble size = volume</span></div>
-    </div>
-  </div>
-
-  <div class="grid" style="grid-template-columns:1fr 1.2fr;margin-top:16px">
-    <div class="card">
-      <h3>Deal setup</h3>
-      <div class="grid" style="gap:11px;margin-top:8px">
-        <div><label>Buyer (B2B)</label><input id="dBuyer" value="Regional distributor"></div>
-        <div class="row" style="gap:10px">
-          <div style="flex:1"><label>Milk type</label><select id="dType" onchange="calcCities()"><option>Buffalo</option><option>Cow</option><option>Mix</option></select></div>
-          <div style="flex:1"><label>Volume (L / day)</label><input id="dVol" class="mono" value="5000" oninput="calcCities()"></div>
-        </div>
-        <div><label>Source center</label><select id="dCenter" onchange="calcCities()"></select></div>
-        <div class="row" style="gap:10px">
-          <div style="flex:1"><label>Deal extra — Opex 2 (Rs/L)</label><input id="dExtra" class="mono" value="0" oninput="calcCities()"></div>
-          <div style="flex:1"><label>Quote override (Rs/L)</label><input id="dOffer" class="mono" placeholder="market" oninput="calcCities()"></div>
+        <div class="card">
+          <h3>Recent market prices <span class="muted" style="font-weight:400">· agent-posted</span></h3>
+          <table><thead><tr><th>Date</th><th>Centre</th><th>Type</th><th>Rs/L</th><th>Fat</th><th>Agent</th></tr></thead><tbody id="dpBody"></tbody></table>
         </div>
       </div>
-      <div class="note" style="margin-top:10px">Leave the quote blank to use each city's own market sell price. Set it to test one flat offer everywhere. Logistics per city is edited in the table below.</div>
     </div>
-    <div class="card">
-      <h3 id="bestTitle">Best margin — city</h3>
-      <div class="kpi" style="grid-template-columns:1fr 1fr;margin-top:8px">
-        <div class="card"><h3>Margin / litre</h3><div class="big mono up" id="bMarginL">—</div></div>
-        <div class="card"><h3>Margin %</h3><div class="big mono" id="bMarginPct">—</div></div>
-        <div class="card"><h3>Gross profit / day</h3><div class="big mono up" id="bGP">—</div></div>
-        <div class="card"><h3>Gross profit / month</h3><div class="big mono" id="bGPm">—</div></div>
+
+    <!-- ============ LANDED COST ============ -->
+    <div id="tab-cost" class="tabpane hide">
+      <div class="row" style="justify-content:space-between;margin-bottom:8px">
+        <div class="seg" id="costCenter"></div>
+        <div class="note">Dashboard view · Landed = raw buying (ERP) + variable OpEx + Opex 2. Not part of the rolling number.</div>
       </div>
-      <div class="stack" id="bStack" style="margin-top:12px"></div>
+      <div class="grid two">
+        <div class="card"><h3 id="costTitle">Bhawana · cost to serve</h3><div class="stack" id="costStack" style="margin-top:8px"></div></div>
+        <div class="card">
+          <h3>Cost inputs</h3>
+          <div style="margin-top:10px">
+            <div class="row" style="justify-content:space-between"><span class="muted">GL opex this month</span><b class="mono" id="glOpex">—</b></div>
+            <div class="row" style="justify-content:space-between"><span class="muted">Litres collected (month)</span><b class="mono" id="glVol">—</b></div>
+            <div class="row" style="justify-content:space-between"><span class="muted">Fixed portion (excluded)</span><b class="mono muted" id="glFix">—</b></div>
+            <div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-top:8px;margin-top:8px"><span class="muted">Variable opex / litre</span><b class="mono up" id="glPerL">—</b></div>
+            <div class="note" style="margin-top:6px">Manual imports (extra cost lines) below — we build these out as we go.</div>
+          </div>
+          <h3 style="margin-top:16px">Opex 2 · manual cost lines</h3>
+          <div id="customLines" style="margin-top:6px"></div>
+          <div class="row" style="gap:8px;margin-top:8px">
+            <input id="clLabel" placeholder="e.g. Chilling" style="flex:2"><input id="clVal" class="mono" placeholder="Rs/L" style="flex:1"><button class="btn ghost" style="width:auto" onclick="addLine()">Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h3>Cost to serve — all centres (Rs / litre, all-milk)</h3>
+        <table><thead><tr><th>Centre</th><th>Raw buying</th><th>Opex/L</th><th>Opex 2</th><th>Landed</th><th></th></tr></thead><tbody id="costTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ============ DEAL DESK ============ -->
+    <div id="tab-deal" class="tabpane hide">
+      <div class="grid two">
+        <div class="card">
+          <div><h3>Margin by city <span class="muted" style="font-weight:400">— after logistics</span></h3><div class="note">Delivered margin from your source centre to each city.</div></div>
+          <canvas id="cityChart" height="150" style="margin-top:8px"></canvas>
+        </div>
+        <div class="card">
+          <div><h3>Delivery margin map</h3><div class="note">Cities coloured by delivered margin from <b id="srcName">Bhawana</b>.</div></div>
+          <div id="sellMap" class="map" style="height:300px;margin-top:8px"></div>
+          <div class="legend"><span><span class="sw" style="background:#EB5757"></span>thin</span><span><span class="sw" style="background:#F2C94C"></span>mid</span><span><span class="sw" style="background:#4CB782"></span>best</span></div>
+        </div>
+      </div>
+      <div class="grid two" style="margin-top:12px">
+        <div class="card">
+          <h3>Deal setup</h3>
+          <div class="grid" style="gap:11px;margin-top:8px">
+            <div><label>Buyer (B2B)</label><input id="dBuyer" value="Regional distributor"></div>
+            <div class="row" style="gap:10px">
+              <div style="flex:1"><label>Milk type</label><select id="dType" onchange="calcCities()"><option>Buffalo</option><option>Cow</option><option>Mix</option></select></div>
+              <div style="flex:1"><label>Volume (L/day)</label><input id="dVol" class="mono" value="5000" oninput="calcCities()"></div>
+            </div>
+            <div><label>Source centre</label><select id="dCenter" onchange="calcCities()"></select></div>
+            <div class="row" style="gap:10px">
+              <div style="flex:1"><label>Deal extra — Opex 2 (Rs/L)</label><input id="dExtra" class="mono" value="0" oninput="calcCities()"></div>
+              <div style="flex:1"><label>Quote override (Rs/L)</label><input id="dOffer" class="mono" placeholder="market" oninput="calcCities()"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 id="bestTitle">Best margin — city</h3>
+          <div class="kpi" style="grid-template-columns:1fr 1fr;margin-top:8px">
+            <div class="card"><h3>Margin / litre</h3><div class="big mono up" id="bMarginL">—</div></div>
+            <div class="card"><h3>Margin %</h3><div class="big mono" id="bMarginPct">—</div></div>
+            <div class="card"><h3>GP / day</h3><div class="big mono up" id="bGP">—</div></div>
+            <div class="card"><h3>GP / month</h3><div class="big mono" id="bGPm">—</div></div>
+          </div>
+          <div class="stack" id="bStack" style="margin-top:12px"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>Cities — add logistics &amp; see margin</h3>
+        <table><thead><tr><th>#</th><th>City</th><th>Sell</th><th>Logistics</th><th>Delivered</th><th>Margin/L</th><th>%</th></tr></thead><tbody id="cityBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ============ ADMIN ============ -->
+    <div id="tab-admin" class="tabpane hide">
+      <div class="card" style="max-width:640px">
+        <h3>Admin · price controls <span class="badge">GOVERNANCE</span></h3>
+        <div class="note" style="margin-top:2px">Hard limits + the thresholds that decide GOOD vs BAD in both calculators. A deal is judged on how far it moves the company 30-day average the right way (buying down / selling up) vs the wrong way.</div>
+        <div class="row" style="gap:12px;margin-top:16px">
+          <div style="flex:1"><label>Buying ceiling — raw Rs/L</label><input id="adBuy" class="mono" oninput="saveAdmin()"></div>
+          <div style="flex:1"><label>Selling floor — Rs/L</label><input id="adSell" class="mono" oninput="saveAdmin()"></div>
+        </div>
+        <h3 style="margin-top:16px">GOOD deal — favourable move of at least</h3>
+        <div class="row" style="gap:12px;margin-top:6px">
+          <div style="flex:1"><label>Absolute (Rs/L on the 30d avg)</label><input id="adGoodAbs" class="mono" oninput="saveAdmin()"></div>
+          <div style="flex:1"><label>or Percentage (%)</label><input id="adGoodPct" class="mono" oninput="saveAdmin()"></div>
+        </div>
+        <h3 style="margin-top:14px">BAD deal — adverse move greater than</h3>
+        <div class="row" style="gap:12px;margin-top:6px">
+          <div style="flex:1"><label>Absolute (Rs/L on the 30d avg)</label><input id="adBadAbs" class="mono" oninput="saveAdmin()"></div>
+          <div style="flex:1"><label>or Percentage (%)</label><input id="adBadPct" class="mono" oninput="saveAdmin()"></div>
+        </div>
+        <div class="note" style="margin-top:10px">Favourable = lowers the buying average or raises the selling average. Anything between the two thresholds shows as OK / marginal. Breaching the ceiling/floor is always BAD.</div>
+        <div id="adStatus" class="verdict" style="background:rgba(76,183,130,.14);color:var(--up);margin-top:16px">Settings applied</div>
+      </div>
+    </div>
+
+    <div class="footer">Prototype · Waseela Milk Exchange · one north-star: company all-milk 30-day rolling price · raw ERP pickup, volume-weighted · numbers illustrative.</div>
     </div>
   </div>
-
-  <div class="card" style="margin-top:16px">
-    <h3>Cities — add logistics &amp; see margin <span class="muted" style="font-weight:400;font-size:12px">(edit logistics inline)</span></h3>
-    <table><thead><tr><th>#</th><th>City</th><th>Sell Rs/L</th><th>Logistics Rs/L</th><th>Delivered cost</th><th>Margin/L</th><th>Margin%</th></tr></thead>
-    <tbody id="cityBody"></tbody></table>
-    <div class="note" style="margin-top:8px">Delivered cost = landed cost (buying + Opex 1 + Opex 2) + deal extra + logistics to that city. Green row = your best margin.</div>
-  </div>
-</div>
-
-<div class="footer">Prototype · Waseela Milk Exchange · seeded with real ERP centers (MCC Mahabali/Bhawana/Ubhaan/Tahli Rang Shah) &amp; price levels · numbers illustrative · for developer hand-off.</div>
 </div>
 
 <script>
-// ---------- seed (real centers + realistic levels) ----------
+// ============ SEED ============
 const CENTERS=[
- {code:"BHW",name:"MCC Bhawana",lat:31.480,lng:72.653,base:{Buffalo:200,Cow:178,Mix:190},opex:1240000,vol:62000},
- {code:"MHB",name:"MCC Mahabali",lat:31.449,lng:72.223,base:{Buffalo:196,Cow:174,Mix:188},opex:980000,vol:48000},
- {code:"UBH",name:"MCC Ubhaan",lat:31.644,lng:72.636,base:{Buffalo:194,Cow:172,Mix:186},opex:1520000,vol:84000},
- {code:"TRS",name:"MCC Tahli Rang Shah",lat:31.608,lng:72.592,base:{Buffalo:200,Cow:180,Mix:192},opex:640000,vol:21000},
+ {code:"BHW",name:"Bhawana",lat:31.480,lng:72.653,base:{Buffalo:200,Cow:178,Mix:190},opex:1240000,vol:62000,fixPct:0.40},
+ {code:"MHB",name:"Mahabali",lat:31.449,lng:72.223,base:{Buffalo:196,Cow:174,Mix:188},opex:980000,vol:48000,fixPct:0.45},
+ {code:"UBH",name:"Ubhaan",lat:31.644,lng:72.636,base:{Buffalo:194,Cow:172,Mix:186},opex:1520000,vol:84000,fixPct:0.35},
+ {code:"TRS",name:"Tahli Rang Shah",lat:31.608,lng:72.592,base:{Buffalo:200,Cow:180,Mix:192},opex:640000,vol:21000,fixPct:0.50},
 ];
-// our own B2B sell markets (sell index) — price = our sell Rs/L, logi = default logistics Rs/L (editable)
 const SELLMKT=[
  {name:"Lahore",lat:31.5204,lng:74.3587,price:268,vol:9000,logi:14},
  {name:"Faisalabad",lat:31.4187,lng:73.0791,price:256,vol:6500,logi:9},
@@ -258,189 +399,250 @@ const SELLMKT=[
  {name:"Multan",lat:30.1575,lng:71.5249,price:252,vol:3000,logi:16},
  {name:"Gujranwala",lat:32.1877,lng:74.1945,price:255,vol:2500,logi:12},
 ];
-let MAPT="Buffalo";
-function heat(t){ // t 0..1 : 0=green(good) -> amber -> 1=red(bad)
- t=Math.max(0,Math.min(1,t));
- const stops=[[0,[0,200,5]],[0.5,[245,166,35]],[1,[255,77,77]]];
- let a=stops[0],b=stops[2];
- for(let i=0;i<stops.length-1;i++){if(t>=stops[i][0]&&t<=stops[i+1][0]){a=stops[i];b=stops[i+1];break;}}
- const f=(t-a[0])/((b[0]-a[0])||1);
- const c=a[1].map((v,i)=>Math.round(v+(b[1][i]-v)*f));
- return `rgb(${c[0]},${c[1]},${c[2]})`;
-}
-let buyMapObj,buyLayer,sellMapObj,sellLayer;
-function tiles(m){L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:18,attribution:'© OSM · CARTO'}).addTo(m);}
-function initBuyMap(){ if(buyMapObj)return;
- buyMapObj=L.map('buyMap',{attributionControl:true}).setView([31.6,72.6],9); tiles(buyMapObj);
- buyLayer=L.layerGroup().addTo(buyMapObj); drawBuyMap();}
-function drawBuyMap(){ if(!buyLayer)return; buyLayer.clearLayers();
- const ps=CENTERS.map(c=>c.base[MAPT]); const mn=Math.min(...ps),mx=Math.max(...ps);
- CENTERS.forEach(c=>{const p=c.base[MAPT]; const mk=MKT[c.code][MAPT]; const m=mk[mk.length-1]; const sp=+(m-p).toFixed(1); const col=heat((p-mn)/((mx-mn)||1));
-  L.circleMarker([c.lat,c.lng],{radius:9+c.vol/9000,color:col,fillColor:col,fillOpacity:.8,weight:2})
-   .bindTooltip(`<b>${c.name}</b><br><span class="sm">${MAPT} · ${(c.vol).toLocaleString()} L/mo</span><br>Our Rs ${p.toFixed(0)} · Market Rs ${m.toFixed(0)}<br><span class="sm">${sp>=0?'▼ Rs '+sp+' below market':'▲ Rs '+Math.abs(sp)+' above market'}</span>`,{className:'mtip',direction:'top',opacity:1})
-   .addTo(buyLayer);});}
-function initSellMap(){ if(sellMapObj){sellMapObj.invalidateSize();return;}
- sellMapObj=L.map('sellMap',{attributionControl:true}).setView([31.6,73.1],7); tiles(sellMapObj);
- sellLayer=L.layerGroup().addTo(sellMapObj);
- setTimeout(()=>sellMapObj.invalidateSize(),120);}
-function drawSellMap(rows){ if(!sellLayer)return; sellLayer.clearLayers();
- const ms=rows.map(r=>r.mar); const mn=Math.min(...ms),mx=Math.max(...ms);
- rows.forEach(r=>{const col=heat(1-(r.mar-mn)/((mx-mn)||1)); // higher margin = green
-  L.circleMarker([r.lat,r.lng],{radius:8+r.vol/1500,color:col,fillColor:col,fillOpacity:.82,weight:2})
-   .bindTooltip(`<b>${r.name}</b><br><span class="sm">sell Rs ${r.sell.toFixed(0)} · logi Rs ${r.logi} · delivered Rs ${r.delivered.toFixed(0)}</span><br>Margin Rs ${r.mar.toFixed(1)} / L (${r.pct.toFixed(1)}%)`,{className:'mtip',direction:'top',opacity:1})
-   .addTo(sellLayer);});}
-const TYPES=["Buffalo","Cow","Mix"];
-const FAT={Buffalo:6.0,Cow:3.8,Mix:4.8};
-const custom={BHW:[["Chilling",5],["Transport",8]],MHB:[["Chilling",5],["Transport",6]],UBH:[["Chilling",4],["Transport",10],["Wastage",3]],TRS:[["Chilling",6],["Transport",7]]};
-// deterministic-ish price series
-function series(base,days){let a=[],p=base-6; for(let i=0;i<days;i++){p+= (Math.sin(i/3)*1.4)+((Math.random()-0.48)*3); p=Math.max(base-14,Math.min(base+8,p)); a.push(+p.toFixed(1));} a[a.length-1]=base; return a;}
-const DATA={}; CENTERS.forEach(c=>{DATA[c.code]={}; TYPES.forEach(t=>DATA[c.code][t]=series(c.base[t],90));});
-// MARKET buying prices (agent-posted). Our price = ERP (DATA). Market usually sits a few Rs above what we pay.
-const MKT={}; CENTERS.forEach(c=>{MKT[c.code]={}; TYPES.forEach(t=>{
- MKT[c.code][t]=DATA[c.code][t].map((v,i)=>+(v+2.5+Math.sin(i/2.5)*2.2+Math.random()*4).toFixed(1));});});
-let SEL={c:"BHW",t:"Buffalo",d:30};
-const dataPoints=[
- ["22 Aug","MCC Bhawana","Buffalo",200,6.1,"Asif"],["22 Aug","MCC Ubhaan","Mix",186,4.9,"Rana"],
- ["22 Aug","MCC Mahabali","Cow",174,3.7,"Bilal"],["21 Aug","MCC Bhawana","Buffalo",195,6.0,"Asif"],
- ["21 Aug","MCC Tahli Rang Shah","Buffalo",200,6.2,"Nadir"],["21 Aug","MCC Ubhaan","Buffalo",194,5.9,"Rana"],
+const SMKT=[
+ {code:"LHR",name:"Lahore",lat:31.5204,lng:74.3587,base:{Buffalo:268,Cow:238,Mix:252},vol:9000,logi:14},
+ {code:"FSD",name:"Faisalabad",lat:31.4187,lng:73.0791,base:{Buffalo:256,Cow:230,Mix:244},vol:6500,logi:9},
+ {code:"SGD",name:"Sargodha",lat:32.0836,lng:72.6711,base:{Buffalo:250,Cow:224,Mix:238},vol:4000,logi:4},
+ {code:"ISB",name:"Islamabad",lat:33.6844,lng:73.0479,base:{Buffalo:270,Cow:242,Mix:256},vol:3500,logi:20},
+ {code:"MUL",name:"Multan",lat:30.1575,lng:71.5249,base:{Buffalo:252,Cow:226,Mix:240},vol:3000,logi:16},
+ {code:"GUJ",name:"Gujranwala",lat:32.1877,lng:74.1945,base:{Buffalo:255,Cow:228,Mix:242},vol:2500,logi:12},
 ];
+const TYPES=["Buffalo","Cow","Mix"];
+const TSHARE={Buffalo:0.55,Cow:0.30,Mix:0.15};
+const CCOL={BHW:'#5E6AD2',MHB:'#4CB782',UBH:'#E2B340',TRS:'#EB5757'};
+const SCOL={LHR:'#5E6AD2',FSD:'#4CB782',SGD:'#E2B340',ISB:'#B08CFF',MUL:'#F2994A',GUJ:'#56CCF2'};
+const custom={BHW:[["Chilling",5],["Transport",8]],MHB:[["Chilling",5],["Transport",6]],UBH:[["Chilling",4],["Transport",10],["Wastage",3]],TRS:[["Chilling",6],["Transport",7]]};
+// good/bad thresholds are on how much a lot moves the company 30-day average (favourable vs adverse), in Rs and %
+const ADMIN={buyCeil:205,sellFloor:250,goodAbs:0.30,goodPct:0.12,badAbs:0.30,badPct:0.12};
+
+function series(base,days){let a=[],p=base-6;for(let i=0;i<days;i++){p+=(Math.sin(i/3)*1.4)+((Math.random()-0.48)*3);p=Math.max(base-14,Math.min(base+8,p));a.push(+p.toFixed(1));}a[a.length-1]=base;return a;}
+const DATA={};CENTERS.forEach(c=>{DATA[c.code]={};TYPES.forEach(t=>DATA[c.code][t]=series(c.base[t],90));});
+const MKT={};CENTERS.forEach(c=>{MKT[c.code]={};TYPES.forEach(t=>{MKT[c.code][t]=DATA[c.code][t].map((v,i)=>+(v+2.5+Math.sin(i/2.5)*2.2+Math.random()*4).toFixed(1));});});
+const VOL={};CENTERS.forEach(c=>{VOL[c.code]={};TYPES.forEach(t=>{const d=c.vol/30*TSHARE[t];VOL[c.code][t]=DATA[c.code][t].map(()=>Math.round(d*(0.8+Math.random()*0.4)));});});
+const SDATA={};SMKT.forEach(m=>{SDATA[m.code]={};TYPES.forEach(t=>SDATA[m.code][t]=series(m.base[t],90));});
+const SVOL={};SMKT.forEach(m=>{SVOL[m.code]={};TYPES.forEach(t=>{const d=m.vol/30*TSHARE[t];SVOL[m.code][t]=SDATA[m.code][t].map(()=>Math.round(d*(0.8+Math.random()*0.4)));});});
+
 const money=n=>"Rs "+Math.round(n).toLocaleString();
 const money1=n=>"Rs "+(+n).toFixed(1);
-function opexPerL(c){return c.opex/c.vol;}
-function landed(code,type){const c=CENTERS.find(x=>x.code===code);const cust=(custom[code]||[]).reduce((s,l)=>s+l[1],0);return c.base[type]+opexPerL(c)+cust;}
+function opexVarPerL(c){return c.opex*(1-c.fixPct)/c.vol;}
+function opexFixPerL(c){return c.opex*c.fixPct/c.vol;}
+const typesOf=f=>f==='All'?TYPES:[f];
+// ---- buying rolling (raw, volume-weighted, supports 'All') ----
+function bRoll(code,f,win,end){const ts=typesOf(f);const e=end==null?89:end;let a=0,v=0;ts.forEach(t=>{const p=DATA[code][t],l=VOL[code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}});return v?a/v:0;}
+function bSeries(code,f,win){const o=[];for(let e=win-1;e<90;e++)o.push(+bRoll(code,f,win,e).toFixed(1));return o;}
+function bOrg(f,win,end){const ts=typesOf(f);const e=end==null?89:end;let a=0,v=0;CENTERS.forEach(c=>ts.forEach(t=>{const p=DATA[c.code][t],l=VOL[c.code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}}));return v?a/v:0;}
+function bOrgSeries(f,win){const o=[];for(let e=win-1;e<90;e++)o.push(+bOrg(f,win,e).toFixed(1));return o;}
+function bPool(win){let a=0,v=0;CENTERS.forEach(c=>TYPES.forEach(t=>{const p=DATA[c.code][t],l=VOL[c.code][t];for(let i=90-win;i<90;i++){a+=p[i]*l[i];v+=l[i];}}));return{amt:a,lit:v};}
+function bNow(code,f){const ts=typesOf(f);let a=0,v=0;ts.forEach(t=>{a+=DATA[code][t][89]*VOL[code][t][89];v+=VOL[code][t][89];});return v?a/v:0;}
+function mNow(code,f){const ts=typesOf(f);let a=0,v=0;ts.forEach(t=>{a+=MKT[code][t][89]*VOL[code][t][89];v+=VOL[code][t][89];});return v?a/v:0;}
+function bDaySeries(obj,code,f){const o=[];for(let i=0;i<90;i++){const ts=typesOf(f);let a=0,v=0;ts.forEach(t=>{a+=obj[code][t][i]*VOL[code][t][i];v+=VOL[code][t][i];});o.push(+(v?a/v:0).toFixed(1));}return o;}
+// ---- selling rolling ----
+function sRoll(code,f,win,end){const ts=typesOf(f);const e=end==null?89:end;let a=0,v=0;ts.forEach(t=>{const p=SDATA[code][t],l=SVOL[code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}});return v?a/v:0;}
+function sSeries(code,f,win){const o=[];for(let e=win-1;e<90;e++)o.push(+sRoll(code,f,win,e).toFixed(1));return o;}
+function sOrg(f,win,end){const ts=typesOf(f);const e=end==null?89:end;let a=0,v=0;SMKT.forEach(m=>ts.forEach(t=>{const p=SDATA[m.code][t],l=SVOL[m.code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}}));return v?a/v:0;}
+function sOrgSeries(f,win){const o=[];for(let e=win-1;e<90;e++)o.push(+sOrg(f,win,e).toFixed(1));return o;}
+function sPool(win){let a=0,v=0;SMKT.forEach(m=>TYPES.forEach(t=>{const p=SDATA[m.code][t],l=SVOL[m.code][t];for(let i=90-win;i<90;i++){a+=p[i]*l[i];v+=l[i];}}));return{amt:a,lit:v};}
 
-// ---------- ticker ----------
-function renderTicker(){
- document.getElementById('ticker').innerHTML=CENTERS.map(c=>{
-  const s=DATA[c.code][SEL.t]; const last=s[s.length-1], prev=s[s.length-2]; const ch=last-prev; const pct=(ch/prev*100);
-  const up=ch>=0;
-  return `<div class="t ${c.code===SEL.c?'sel':''}" onclick="selCenter('${c.code}')">
-   <div class="n"><span>${c.name}</span><span>${SEL.t}</span></div>
-   <div class="p mono">${money1(last)}</div>
-   <div class="c ${up?'up':'down'}">${up?'▲':'▼'} ${Math.abs(pct).toFixed(1)}% (${up?'+':''}${ch.toFixed(1)})</div>
-  </div>`}).join('');
-}
-// ---------- price chart ----------
+// ============ maps ============
+function heat(t){t=Math.max(0,Math.min(1,t));const st=[[0,[76,183,130]],[0.5,[242,201,76]],[1,[235,87,87]]];let a=st[0],b=st[2];for(let i=0;i<st.length-1;i++){if(t>=st[i][0]&&t<=st[i+1][0]){a=st[i];b=st[i+1];break;}}const f=(t-a[0])/((b[0]-a[0])||1);const c=a[1].map((v,i)=>Math.round(v+(b[1][i]-v)*f));return `rgb(${c[0]},${c[1]},${c[2]})`;}
+let buyMapObj,buyLayer,sellMapObj,sellLayer,saleMapObj,saleLayer;
+function tiles(m){L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:18,attribution:'© OSM · CARTO'}).addTo(m);}
+function initBuyMap(){if(buyMapObj){buyMapObj.invalidateSize();return;}buyMapObj=L.map('buyMap',{attributionControl:true}).setView([31.6,72.6],9);tiles(buyMapObj);buyLayer=L.layerGroup().addTo(buyMapObj);drawBuyMap();}
+function drawBuyMap(){if(!buyLayer)return;buyLayer.clearLayers();const ps=CENTERS.map(c=>bNow(c.code,FLT));const mn=Math.min(...ps),mx=Math.max(...ps);
+ CENTERS.forEach(c=>{const p=bNow(c.code,FLT),m=mNow(c.code,FLT),sp=+(m-p).toFixed(1),col=heat((p-mn)/((mx-mn)||1));
+  L.circleMarker([c.lat,c.lng],{radius:9+c.vol/9000,color:col,fillColor:col,fillOpacity:.8,weight:2})
+   .bindTooltip(`<b>${c.name}</b><br><span class="sm">${FLT} · ${c.vol.toLocaleString()} L/mo</span><br>Our Rs ${p.toFixed(0)} · Market Rs ${m.toFixed(0)}<br><span class="sm">${sp>=0?'▼ Rs '+sp+' below market':'▲ Rs '+Math.abs(sp)+' above'}</span>`,{className:'mtip',direction:'top',opacity:1}).addTo(buyLayer);});}
+function initSaleMap(){if(saleMapObj){saleMapObj.invalidateSize();drawSaleMap();return;}saleMapObj=L.map('saleMap',{attributionControl:true}).setView([31.6,73.1],7);tiles(saleMapObj);saleLayer=L.layerGroup().addTo(saleMapObj);drawSaleMap();setTimeout(()=>saleMapObj.invalidateSize(),120);}
+function drawSaleMap(){if(!saleLayer)return;saleLayer.clearLayers();const rs=SMKT.map(m=>sRoll(m.code,FLT,30));const mn=Math.min(...rs),mx=Math.max(...rs);
+ SMKT.forEach(m=>{const r=sRoll(m.code,FLT,30),col=heat(1-(r-mn)/((mx-mn)||1));
+  L.circleMarker([m.lat,m.lng],{radius:8+m.vol/1500,color:col,fillColor:col,fillOpacity:.82,weight:2})
+   .bindTooltip(`<b>${m.name}</b><br><span class="sm">${FLT} · ${m.vol.toLocaleString()} L/mo</span><br>30d sell Rs ${r.toFixed(1)}`,{className:'mtip',direction:'top',opacity:1}).addTo(saleLayer);});}
+function initSellMap(){if(sellMapObj){sellMapObj.invalidateSize();return;}sellMapObj=L.map('sellMap',{attributionControl:true}).setView([31.6,73.1],7);tiles(sellMapObj);sellLayer=L.layerGroup().addTo(sellMapObj);setTimeout(()=>sellMapObj.invalidateSize(),120);}
+function drawSellMap(rows){if(!sellLayer)return;sellLayer.clearLayers();const ms=rows.map(r=>r.mar);const mn=Math.min(...ms),mx=Math.max(...ms);
+ rows.forEach(r=>{const col=heat(1-(r.mar-mn)/((mx-mn)||1));
+  L.circleMarker([r.lat,r.lng],{radius:8+r.vol/1500,color:col,fillColor:col,fillOpacity:.82,weight:2})
+   .bindTooltip(`<b>${r.name}</b><br><span class="sm">sell Rs ${r.sell.toFixed(0)} · logi Rs ${r.logi} · delivered Rs ${r.delivered.toFixed(0)}</span><br>Margin Rs ${r.mar.toFixed(1)}/L (${r.pct.toFixed(1)}%)`,{className:'mtip',direction:'top',opacity:1}).addTo(sellLayer);});}
+
+// ============ state + nav ============
+let FLT='All', CURTAB='buy';
+let SEL={c:"BHW",d:30};
+let BKSEL={own:'BHW',centers:{BHW:true,MHB:true,UBH:true,TRS:true}};
+let SSEL={own:'LHR',markets:{LHR:true,FSD:true,SGD:true,ISB:true,MUL:true,GUJ:true}};
+const TTL={buy:['Buying Desk','One number: the company all-milk 30-day rolling buying price'],sell:['Sales Desk','One number: the company all-milk 30-day rolling selling price'],post:['Post Market Price','Field agents log market buying prices'],cost:['Landed Cost','Dashboard view — raw + OpEx + manual lines'],deal:['Deal Desk','B2B margin by city after logistics'],admin:['Admin','Ceiling, floor & rolling-average guardrail']};
+function toggleSide(){document.getElementById('side').classList.toggle('collapsed');setTimeout(()=>{[buyMapObj,sellMapObj,saleMapObj].forEach(m=>m&&m.invalidateSize());},180);}
+function switchTab(t){CURTAB=t;document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+ document.querySelectorAll('.tabpane').forEach(p=>p.classList.add('hide'));document.getElementById('tab-'+t).classList.remove('hide');
+ document.getElementById('ttl').textContent=TTL[t][0];document.getElementById('sub').textContent=TTL[t][1];renderActive();}
+function renderActive(){if(CURTAB==='buy')renderBuy();else if(CURTAB==='sell')renderSell();else if(CURTAB==='post')renderDP();else if(CURTAB==='cost')selCost(COSTSEL);else if(CURTAB==='deal'){initSellMap();calcCities();setTimeout(()=>{if(sellMapObj)sellMapObj.invalidateSize();},120);}else if(CURTAB==='admin')renderAdmin();}
+function setFlt(f){FLT=f;document.querySelectorAll('#fltBuy button,#fltSell button').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+ document.getElementById('fltTagBuy').textContent=f==='All'?'All milk':f;document.getElementById('fltTagSell').textContent=f==='All'?'All milk':f;renderActive();}
+
+// ============ BUYING DESK ============
+function renderBuy(){
+ const r30=bOrg(FLT,30),r7=bOrg(FLT,7),r14=bOrg(FLT,14);
+ document.getElementById('buyHero').textContent=money1(r30);
+ const d7=r7-r30;const dir=d7<=0?'▼':'▲';
+ document.getElementById('buyHeroMeta').innerHTML=`<span class="${d7<=0?'up':'down'}">${dir} Rs ${Math.abs(d7).toFixed(1)} 7-day vs 30-day</span> · company-wide, volume-weighted`;
+ renderDeskKpi(r7,r14,r30);renderBTicker();renderDeskCenters();drawDeskChart();calcBuy();renderDeskTable();renderSpread();renderChart();
+ initBuyMap();setTimeout(()=>{if(buyMapObj){buyMapObj.invalidateSize();drawBuyMap();}},100);}
+function renderDeskKpi(r7,r14,r30){const sell=sOrg(FLT,30),mar=sell-r30,pct=sell?mar/sell*100:0;const d7=r7-r30,d14=r14-r30;const ar=d=>d<=0?'▼':'▲',cl=d=>d<=0?'up':'down';
+ document.getElementById('deskKpi').innerHTML=[
+  `<div class="card"><h3>7-day avg</h3><div class="big mono" style="font-size:22px">${money1(r7)}</div><div class="mono ${cl(d7)}" style="font-size:12px">${ar(d7)} Rs ${Math.abs(d7).toFixed(1)} vs 30d</div></div>`,
+  `<div class="card"><h3>14-day avg</h3><div class="big mono" style="font-size:22px">${money1(r14)}</div><div class="mono ${cl(d14)}" style="font-size:12px">${ar(d14)} Rs ${Math.abs(d14).toFixed(1)} vs 30d</div></div>`,
+  `<div class="card"><h3>Margin @ 30d sell ${money1(sell)}</h3><div class="big mono ${mar>=0?'up':'down'}" style="font-size:22px">${money1(mar)}</div><div class="note">${pct.toFixed(1)}% · sell − buy</div></div>`
+ ].join('');}
+function renderBTicker(){document.getElementById('bTicker').innerHTML=CENTERS.map(c=>{const r30=bRoll(c.code,FLT,30),r7=bRoll(c.code,FLT,7),up=r7<=r30;
+  return `<div class="t ${c.code===SEL.c?'sel':''}" onclick="selCenter('${c.code}')"><div class="n"><span>${c.name}</span><span>30d</span></div><div class="p mono">${money1(r30)}</div><div class="c ${up?'up':'down'}">${up?'▼':'▲'} Rs ${Math.abs(r7-r30).toFixed(1)} 7d</div></div>`;}).join('');}
+function selCenter(code){SEL.c=code;const s=document.getElementById('bkCenter');if(s)s.value=code;BKSEL.own=code;renderBTicker();renderChart();calcBuy();}
+function renderDeskCenters(){document.getElementById('deskCenters').innerHTML=CENTERS.map(c=>{const on=BKSEL.centers[c.code];
+  return `<button style="padding:5px 10px;border-radius:7px;border:1px solid ${on?CCOL[c.code]:'var(--line)'};background:${on?'transparent':'var(--panel2)'};color:${on?CCOL[c.code]:'var(--mut)'};font-weight:500;font-size:12px;cursor:pointer" onclick="toggleDeskCenter('${c.code}')">${on?'●':'○'} ${c.name}</button>`;}).join('');}
+function toggleDeskCenter(code){BKSEL.centers[code]=!BKSEL.centers[code];renderDeskCenters();drawDeskChart();}
+let deskCh;
+function drawDeskChart(){const codes=CENTERS.filter(c=>BKSEL.centers[c.code]);const labels=Array.from({length:61},(_,i)=>i);
+ const ds=[{label:'Company avg',data:bOrgSeries(FLT,30),borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.25,pointRadius:0,borderWidth:3}];
+ codes.forEach(c=>ds.push({label:c.name,data:bSeries(c.code,FLT,30),borderColor:CCOL[c.code],backgroundColor:'transparent',fill:false,tension:.25,pointRadius:0,borderWidth:1.5}));
+ const ctx=document.getElementById('deskChart');if(deskCh)deskCh.destroy();
+ deskCh=new Chart(ctx,{type:'line',data:{labels,datasets:ds},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:()=>'',label:x=>x.dataset.label+': Rs '+x.raw}}},scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},interaction:{intersect:false}}});}
+function renderDeskTable(){const sell=sOrg(FLT,30);
+ const rows=CENTERS.map(c=>{const r30=bRoll(c.code,FLT,30),r14=bRoll(c.code,FLT,14),r7=bRoll(c.code,FLT,7);return {code:c.code,name:c.name,r7,r14,r30,mar:sell-r30};}).sort((a,b)=>a.r30-b.r30);
+ document.getElementById('deskTable').innerHTML=rows.map((r,i)=>`<tr${r.code===BKSEL.own?' style="background:rgba(94,106,210,.14)"':''}><td>${i+1}</td><td><span style="color:${CCOL[r.code]}">●</span> ${r.name}${i===0?' <span class="badge">BEST</span>':''}</td><td class="mono">${money1(r.r7)}</td><td class="mono">${money1(r.r14)}</td><td class="mono"><b>${money1(r.r30)}</b></td><td class="mono ${r.mar>=0?'up':'down'}">${money1(r.mar)}</td><td style="width:80px"><div class="bar"><span style="width:${Math.min(100,Math.max(4,(r.r30-175)/(225-175)*100))}%;background:${CCOL[r.code]}"></span></div></td></tr>`).join('');}
+function renderSpread(){const rows=CENTERS.map(c=>{const o=bNow(c.code,FLT),m=mNow(c.code,FLT),sp=+(m-o).toFixed(1);return {name:c.name,o,m,sp};}).sort((a,b)=>b.sp-a.sp);const mx=Math.max(...rows.map(r=>Math.abs(r.sp)),1);
+ document.getElementById('spreadBody').innerHTML=rows.map((r,i)=>{const good=r.sp>=0,w=Math.min(100,Math.abs(r.sp)/mx*100);
+  return `<tr><td>${i+1}</td><td>${r.name}${i===0?' <span class="badge">BEST</span>':''}</td><td class="mono">${money1(r.o)}</td><td class="mono">${money1(r.m)}</td><td class="mono ${good?'up':'down'}">${good?'▼ '+r.sp.toFixed(1):'▲ '+Math.abs(r.sp).toFixed(1)}</td><td style="width:80px"><div class="bar"><span style="width:${w}%;background:${good?'var(--up)':'var(--down)'}"></span></div></td></tr>`;}).join('');}
 let pc;
-function renderChart(){
- const s=DATA[SEL.c][SEL.t].slice(-SEL.d); const mk=MKT[SEL.c][SEL.t].slice(-SEL.d);
- const c=CENTERS.find(x=>x.code===SEL.c);
- const last=s[s.length-1],first=s[0],ch=last-first,pct=ch/first*100,up=ch>=0;
- const mlast=mk[mk.length-1], sp=+(mlast-last).toFixed(1);
- document.getElementById('chTitle').textContent=`${c.name} · ${SEL.t}`;
- document.getElementById('chPrice').textContent=money1(last);
- const chg=document.getElementById('chChg'); const below=sp>=0; chg.className=below?'up':'down';
- chg.innerHTML=`${below?'▼':'▲'} Rs ${Math.abs(sp).toFixed(1)} ${below?'below':'above'} market`;
- const ctx=document.getElementById('priceChart'); const col=up?'#00C805':'#FF4D4D';
- const g=ctx.getContext('2d').createLinearGradient(0,0,0,180); g.addColorStop(0,col+'55'); g.addColorStop(1,col+'00');
+function renderChart(){const s=bDaySeries(DATA,SEL.c,FLT).slice(-SEL.d);const mk=bDaySeries(MKT,SEL.c,FLT).slice(-SEL.d);const c=CENTERS.find(x=>x.code===SEL.c);
+ const last=s[s.length-1],mlast=mk[mk.length-1],sp=+(mlast-last).toFixed(1);
+ document.getElementById('chTitle').textContent=`${c.name} · ${FLT}`;document.getElementById('chPrice').textContent=money1(last);
+ const chg=document.getElementById('chChg');const below=sp>=0;chg.className=below?'up':'down';chg.innerHTML=`${below?'▼':'▲'} Rs ${Math.abs(sp).toFixed(1)} ${below?'below':'above'} mkt`;
+ const ctx=document.getElementById('priceChart');const col='#5E6AD2';const g=ctx.getContext('2d').createLinearGradient(0,0,0,170);g.addColorStop(0,col+'44');g.addColorStop(1,col+'00');
  if(pc)pc.destroy();
- pc=new Chart(ctx,{type:'line',data:{labels:s.map((_,i)=>i),datasets:[
-   {label:'Our buying · ERP',data:s,borderColor:col,backgroundColor:g,fill:true,tension:.25,pointRadius:0,borderWidth:2},
-   {label:'Market · agents',data:mk,borderColor:'#8aa0b6',borderDash:[5,4],fill:false,tension:.25,pointRadius:0,borderWidth:2}
-  ]},
-  options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},
-    tooltip:{mode:'index',intersect:false,callbacks:{title:()=>'',label:x=>x.dataset.label+': Rs '+x.raw}}},
-   scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},
-   interaction:{intersect:false}}});
-}
-function renderKpi(){
- const s=DATA[SEL.c][SEL.t], mkt=MKT[SEL.c][SEL.t];
- const o=s[s.length-1], m=mkt[mkt.length-1], sp=+(m-o).toFixed(1);
- const good=sp>=0; // market above ours => we buy below market (good)
- const spTxt=(good?'▼ Rs '+sp.toFixed(1)+' below':'▲ Rs '+Math.abs(sp).toFixed(1)+' above');
- document.getElementById('marketKpi').innerHTML=[
-  `<div class="card"><h3>Our buying · ERP</h3><div class="big mono" style="font-size:24px">${money1(o)}</div></div>`,
-  `<div class="card"><h3>Market · agents</h3><div class="big mono" style="font-size:24px">${money1(m)}</div></div>`,
-  `<div class="card"><h3>Spread vs market</h3><div class="big mono ${good?'up':'down'}" style="font-size:19px">${spTxt}</div></div>`,
-  `<div class="card"><h3>Avg fat</h3><div class="big mono" style="font-size:24px">${FAT[SEL.t].toFixed(1)}%</div></div>`
- ].join('');
-}
-function renderSpread(){
- const rows=CENTERS.map(c=>{const o=DATA[c.code][SEL.t],m=MKT[c.code][SEL.t];
-   const ov=o[o.length-1],mv=m[m.length-1],sp=+(mv-ov).toFixed(1);return {name:c.name,ov,mv,sp};}).sort((a,b)=>b.sp-a.sp);
- const mx=Math.max(...rows.map(r=>Math.abs(r.sp)),1);
- document.getElementById('spreadBody').innerHTML=rows.map((r,i)=>{
-  const good=r.sp>=0,w=Math.min(100,Math.abs(r.sp)/mx*100);
-  return `<tr><td>${i+1}</td><td>${r.name}${i===0?' <span class="badge">BEST</span>':''}</td>`+
-   `<td class="mono">${money1(r.ov)}</td><td class="mono">${money1(r.mv)}</td>`+
-   `<td class="mono ${good?'up':'down'}">${good?'▼ Rs '+r.sp.toFixed(1)+' below':'▲ Rs '+Math.abs(r.sp).toFixed(1)+' above'}</td>`+
-   `<td style="width:120px"><div class="bar"><span style="width:${w}%;background:${good?'var(--up)':'var(--down)'}"></span></div></td></tr>`;}).join('');
-}
-function renderDP(){document.getElementById('dpBody').innerHTML=dataPoints.map(d=>{
-  const cls=d[2]==='Buffalo'?'buf':d[2]==='Cow'?'cow':'mix';
-  return `<tr><td class="muted">${d[0]}</td><td>${d[1]}</td><td><span class="pill ${cls}">${d[2]}</span></td><td class="mono">${money1(d[3])}</td><td class="mono">${d[4]}</td><td class="muted">${d[5]}</td></tr>`}).join('');}
-function selCenter(code){SEL.c=code;renderTicker();renderChart();renderKpi();}
-function postPrice(){
- const c=document.getElementById('pc').value,t=document.getElementById('pt').value,d=document.getElementById('pd').value,
-   p=parseFloat(document.getElementById('pp').value),f=document.getElementById('pf').value;
- const cen=CENTERS.find(x=>x.name===c); if(!cen||isNaN(p))return;
- MKT[cen.code][t].push(p); MKT[cen.code][t].shift();   // agents post MARKET price
- dataPoints.unshift([d.replace(' 2026',''),c,t,p,parseFloat(f)||'',"You"]);
- SEL.c=cen.code;SEL.t=t;
- document.querySelectorAll('#typeSel button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
- renderTicker();renderChart();renderKpi();renderSpread();renderDP();if(buyMapObj)drawBuyMap();
-}
+ pc=new Chart(ctx,{type:'line',data:{labels:s.map((_,i)=>i),datasets:[{label:'Our · ERP',data:s,borderColor:col,backgroundColor:g,fill:true,tension:.25,pointRadius:0,borderWidth:2},{label:'Market · agents',data:mk,borderColor:'#6B7280',borderDash:[5,4],fill:false,tension:.25,pointRadius:0,borderWidth:2}]},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:()=>'',label:x=>x.dataset.label+': Rs '+x.raw}}},scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},interaction:{intersect:false}}});}
+function dealVerdict(cur,nw,side){const delta=nw-cur;const pct=cur?Math.abs(delta)/cur*100:0;const favorable=side==='buy'?delta<0:delta>0;const abs=Math.abs(delta);
+ let cls,label;
+ if(favorable&&(abs>=ADMIN.goodAbs||pct>=ADMIN.goodPct)){cls='good';label='GOOD DEAL';}
+ else if(!favorable&&(abs>ADMIN.badAbs||pct>ADMIN.badPct)){cls='bad';label='BAD DEAL';}
+ else{cls='ok';label='OK · MARGINAL';}
+ return {cls,label,delta,pct,favorable,abs};}
+function calcBuy(){const code=document.getElementById('bkCenter').value;if(code)BKSEL.own=code;const c=CENTERS.find(x=>x.code===BKSEL.own);
+ const raw=parseFloat(document.getElementById('bkPrice').value)||0,vol=parseFloat(document.getElementById('bkVol').value)||0;
+ const useOpex=document.getElementById('bkOpex').checked,useLogi=document.getElementById('bkLogi').checked,logiVal=parseFloat(document.getElementById('bkLogiVal').value)||0;
+ const pool=bPool(30);const cur=pool.lit?pool.amt/pool.lit:0;const nw=(pool.amt+raw*vol)/((pool.lit+vol)||1);
+ let cost=raw;const lines=[`<div class="ln"><span>Raw price</span><b class="mono">${money1(raw)}</b></div>`];
+ if(useOpex){const op=opexVarPerL(c);cost+=op;lines.push(`<div class="ln"><span>+ OpEx (${c.name})</span><b class="mono down">${money1(op)}</b></div>`);}
+ if(useLogi){cost+=logiVal;lines.push(`<div class="ln"><span>+ Logistics</span><b class="mono down">${money1(logiVal)}</b></div>`);}
+ if(useOpex||useLogi)lines.push(`<div class="ln"><span>= Landed cost</span><b class="mono down">${money1(cost)}</b></div>`);
+ lines.push(`<div class="ln"><span>Company 30d avg now</span><b class="mono">${money1(cur)}</b></div>`);
+ lines.push(`<div class="ln tot"><span>New company 30d avg</span><b class="mono ${nw<=cur?'up':'down'}">${money1(nw)}</b></div>`);
+ document.getElementById('bkStack').innerHTML=lines.join('');
+ const vd=dealVerdict(cur,nw,'buy');let reason='';if(raw>ADMIN.buyCeil){vd.cls='bad';vd.label='BAD DEAL';reason=' · above ceiling '+money1(ADMIN.buyCeil);}
+ const arrow=nw<cur?'▼':(nw>cur?'▲':'▪'),word=nw<cur?'lowers':(nw>cur?'raises':'holds'),signed=(nw>=cur?'+':'−')+'Rs '+Math.abs(nw-cur).toFixed(2);
+ const el=document.getElementById('bkVerdict');el.className='deal '+vd.cls;
+ el.innerHTML=`<div class="dl">${vd.label}</div><div class="dm">${arrow} ${word} the 30-day avg to <b>${money1(nw)}</b> · ${signed} (${vd.pct.toFixed(2)}%)${reason}</div>`;
+ const ranked=CENTERS.map(x=>({name:x.name,r:bRoll(x.code,'All',30)})).sort((a,b)=>a.r-b.r);const cheap=ranked[0];const myAvg=bRoll(BKSEL.own,'All',30);const vsMy=raw-myAvg;
+ document.getElementById('bkSugg').innerHTML=`vs <b>${c.name}</b>'s 30d avg (${money1(myAvg)}) this lot is <b class="${vsMy<=0?'up':'down'}">${vsMy<=0?'▼':'▲'} Rs ${Math.abs(vsMy).toFixed(1)}</b>. Cheapest centre now: <b>${cheap.name} (${money1(cheap.r)})</b>.`+(raw>ADMIN.buyCeil?` <b class="down">Get the price under ${money1(ADMIN.buyCeil)}.</b>`:'');}
 
-// ---------- landed cost ----------
-function renderCostCenter(){
- document.getElementById('costCenter').innerHTML=CENTERS.map((c,i)=>`<button data-c="${c.code}" class="${i===0?'on':''}" onclick="selCost('${c.code}')">${c.name}</button>`).join('');
- selCost('BHW');
-}
+// ============ SALES DESK ============
+function renderSell(){
+ const r30=sOrg(FLT,30),r7=sOrg(FLT,7),r14=sOrg(FLT,14);
+ document.getElementById('sellHero').textContent=money1(r30);
+ const d7=r7-r30;const dir=d7>=0?'▲':'▼';
+ document.getElementById('sellHeroMeta').innerHTML=`<span class="${d7>=0?'up':'down'}">${dir} Rs ${Math.abs(d7).toFixed(1)} 7-day vs 30-day</span> · company-wide, volume-weighted`;
+ renderSellKpi(r7,r14,r30);renderSTicker();renderSellCenters();drawSellChart();calcSell();renderSellTable();
+ initSaleMap();setTimeout(()=>{if(saleMapObj){saleMapObj.invalidateSize();drawSaleMap();}},100);}
+function renderSellKpi(r7,r14,r30){const buy=bOrg(FLT,30),mar=r30-buy,pct=r30?mar/r30*100:0;const d7=r7-r30,d14=r14-r30;const ar=d=>d>=0?'▲':'▼',cl=d=>d>=0?'up':'down';
+ document.getElementById('sellKpi').innerHTML=[
+  `<div class="card"><h3>7-day avg</h3><div class="big mono" style="font-size:22px">${money1(r7)}</div><div class="mono ${cl(d7)}" style="font-size:12px">${ar(d7)} Rs ${Math.abs(d7).toFixed(1)} vs 30d</div></div>`,
+  `<div class="card"><h3>14-day avg</h3><div class="big mono" style="font-size:22px">${money1(r14)}</div><div class="mono ${cl(d14)}" style="font-size:12px">${ar(d14)} Rs ${Math.abs(d14).toFixed(1)} vs 30d</div></div>`,
+  `<div class="card"><h3>Margin @ 30d buy ${money1(buy)}</h3><div class="big mono ${mar>=0?'up':'down'}" style="font-size:22px">${money1(mar)}</div><div class="note">${pct.toFixed(1)}% · sell − buy</div></div>`
+ ].join('');}
+function renderSTicker(){document.getElementById('sTicker').innerHTML=SMKT.map(m=>{const r30=sRoll(m.code,FLT,30),r7=sRoll(m.code,FLT,7),up=r7>=r30;
+  return `<div class="t ${m.code===SSEL.own?'sel':''}" onclick="selMarket('${m.code}')"><div class="n"><span>${m.name}</span><span>30d</span></div><div class="p mono">${money1(r30)}</div><div class="c ${up?'up':'down'}">${up?'▲':'▼'} Rs ${Math.abs(r7-r30).toFixed(1)} 7d</div></div>`;}).join('');}
+function selMarket(code){SSEL.own=code;const s=document.getElementById('skMarket');if(s)s.value=code;onMarketChange();}
+function onMarketChange(){const m=SMKT.find(x=>x.code===document.getElementById('skMarket').value);if(m){SSEL.own=m.code;document.getElementById('skLogiVal').value=m.logi;}renderSTicker();calcSell();}
+function renderSellCenters(){document.getElementById('sellCenters').innerHTML=SMKT.map(m=>{const on=SSEL.markets[m.code];
+  return `<button style="padding:5px 10px;border-radius:7px;border:1px solid ${on?SCOL[m.code]:'var(--line)'};background:${on?'transparent':'var(--panel2)'};color:${on?SCOL[m.code]:'var(--mut)'};font-weight:500;font-size:12px;cursor:pointer" onclick="toggleSellMarket('${m.code}')">${on?'●':'○'} ${m.name}</button>`;}).join('');}
+function toggleSellMarket(code){SSEL.markets[code]=!SSEL.markets[code];renderSellCenters();drawSellChart();}
+let sellCh;
+function drawSellChart(){const codes=SMKT.filter(m=>SSEL.markets[m.code]);const labels=Array.from({length:61},(_,i)=>i);
+ const ds=[{label:'Company avg',data:sOrgSeries(FLT,30),borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.25,pointRadius:0,borderWidth:3}];
+ codes.forEach(m=>ds.push({label:m.name,data:sSeries(m.code,FLT,30),borderColor:SCOL[m.code],backgroundColor:'transparent',fill:false,tension:.25,pointRadius:0,borderWidth:1.5}));
+ const ctx=document.getElementById('sellChart');if(sellCh)sellCh.destroy();
+ sellCh=new Chart(ctx,{type:'line',data:{labels,datasets:ds},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:()=>'',label:x=>x.dataset.label+': Rs '+x.raw}}},scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},interaction:{intersect:false}}});}
+function renderSellTable(){const buy=bOrg(FLT,30);
+ const rows=SMKT.map(m=>{const r30=sRoll(m.code,FLT,30),r14=sRoll(m.code,FLT,14),r7=sRoll(m.code,FLT,7);return {code:m.code,name:m.name,r7,r14,r30,mar:r30-buy};}).sort((a,b)=>b.r30-a.r30);const mx=Math.max(...rows.map(r=>r.r30)),mn=Math.min(...rows.map(r=>r.r30));
+ document.getElementById('sellTable').innerHTML=rows.map((r,i)=>`<tr${r.code===SSEL.own?' style="background:rgba(94,106,210,.14)"':''}><td>${i+1}</td><td><span style="color:${SCOL[r.code]}">●</span> ${r.name}${i===0?' <span class="badge">BEST</span>':''}</td><td class="mono">${money1(r.r7)}</td><td class="mono">${money1(r.r14)}</td><td class="mono"><b>${money1(r.r30)}</b></td><td class="mono ${r.mar>=0?'up':'down'}">${money1(r.mar)}</td><td style="width:80px"><div class="bar"><span style="width:${Math.min(100,Math.max(4,(r.r30-mn)/((mx-mn)||1)*100))}%;background:${SCOL[r.code]}"></span></div></td></tr>`).join('');}
+function calcSell(){const mcode=document.getElementById('skMarket').value;if(mcode)SSEL.own=mcode;
+ const sale=parseFloat(document.getElementById('skPrice').value)||0,vol=parseFloat(document.getElementById('skVol').value)||0;
+ const useOpex=document.getElementById('skOpex').checked,useLogi=document.getElementById('skLogi').checked,logiVal=parseFloat(document.getElementById('skLogiVal').value)||0;
+ const pool=sPool(30);const cur=pool.lit?pool.amt/pool.lit:0;const nw=(pool.amt+sale*vol)/((pool.lit+vol)||1);
+ const src=CENTERS.map(c=>{let cost=bNow(c.code,FLT);if(useOpex)cost+=opexVarPerL(c);if(useLogi)cost+=logiVal;return {name:c.name,code:c.code,cost,mar:sale-cost};}).sort((a,b)=>b.mar-a.mar);
+ const best=src[0],worst=src[src.length-1];
+ document.getElementById('skStack').innerHTML=
+  `<div class="ln"><span>Sale price</span><b class="mono">${money1(sale)}</b></div>`+
+  `<div class="ln"><span>Cheapest source (${best.name})</span><b class="mono down">${money1(best.cost)}</b></div>`+
+  `<div class="ln"><span>Best margin / litre</span><b class="mono ${best.mar>=0?'up':'down'}">${money1(best.mar)}</b></div>`+
+  `<div class="ln"><span>Company 30d sell now</span><b class="mono">${money1(cur)}</b></div>`+
+  `<div class="ln tot"><span>New company 30d sell</span><b class="mono ${nw>=cur?'up':'down'}">${money1(nw)}</b></div>`;
+ const vd=dealVerdict(cur,nw,'sell');let reason='';if(sale<ADMIN.sellFloor){vd.cls='bad';vd.label='BAD DEAL';reason=' · below floor '+money1(ADMIN.sellFloor);}
+ const arrow=nw>cur?'▲':(nw<cur?'▼':'▪'),word=nw>cur?'raises':(nw<cur?'lowers':'holds'),signed=(nw>=cur?'+':'-')+'Rs '+Math.abs(nw-cur).toFixed(2);
+ const el=document.getElementById('skVerdict');el.className='deal '+vd.cls;
+ el.innerHTML=`<div class="dl">${vd.label}</div><div class="dm">${arrow} ${word} the 30-day sell avg to <b>${money1(nw)}</b> · ${signed} (${vd.pct.toFixed(2)}%)${reason}</div>`;
+ const topMkt=SMKT.map(m=>({name:m.name,r:sRoll(m.code,FLT,30)})).sort((a,b)=>b.r-a.r)[0];
+ let sug=`Source from <b>${best.name}</b> → margin <b class="${best.mar>=0?'up':'down'}">${money1(best.mar)}/L</b> (vs ${worst.name} ${money1(worst.mar)}).`;
+ if(useLogi)sug+=` Drop logistics → <b>${money1(best.mar+logiVal)}/L</b>.`;
+ if(useOpex)sug+=` Drop OpEx → <b>${money1(best.mar+opexVarPerL(CENTERS.find(c=>c.code===best.code)))}/L</b>.`;
+ sug+=` Highest-priced market now: <b>${topMkt.name} (${money1(topMkt.r)})</b>.`;
+ document.getElementById('skSugg').innerHTML=sug;
+ document.getElementById('srcBody').innerHTML=src.map((r,i)=>`<tr${i===0?' style="background:rgba(76,183,130,.10)"':''}><td>${i+1}</td><td>${r.name}${i===0?' <span class="badge">CHEAPEST</span>':''}</td><td class="mono">${money1(r.cost)}</td><td class="mono ${r.mar>=0?'up':'down'}">${money1(r.mar)}</td><td style="width:70px"><div class="bar"><span style="width:${Math.min(100,Math.max(4,r.mar/Math.max(...src.map(x=>x.mar),1)*100))}%;background:var(--up)"></span></div></td></tr>`).join('');}
+
+// ============ POST ============
+const dataPoints=[
+ ["22 Aug","Bhawana","Buffalo",200,6.1,"Asif"],["22 Aug","Ubhaan","Mix",186,4.9,"Rana"],
+ ["22 Aug","Mahabali","Cow",174,3.7,"Bilal"],["21 Aug","Bhawana","Buffalo",195,6.0,"Asif"],
+ ["21 Aug","Tahli Rang Shah","Buffalo",200,6.2,"Nadir"],["21 Aug","Ubhaan","Buffalo",194,5.9,"Rana"],
+];
+function renderDP(){document.getElementById('dpBody').innerHTML=dataPoints.map(d=>{const cls=d[2]==='Buffalo'?'buf':d[2]==='Cow'?'cow':'mix';
+  return `<tr><td class="muted">${d[0]}</td><td>${d[1]}</td><td><span class="pill ${cls}">${d[2]}</span></td><td class="mono">${money1(d[3])}</td><td class="mono">${d[4]}</td><td class="muted">${d[5]}</td></tr>`;}).join('');}
+function postPrice(){const c=document.getElementById('pc').value,t=document.getElementById('pt').value,d=document.getElementById('pd').value,p=parseFloat(document.getElementById('pp').value),f=document.getElementById('pf').value;
+ const cen=CENTERS.find(x=>x.name===c);if(!cen||isNaN(p))return;MKT[cen.code][t].push(p);MKT[cen.code][t].shift();
+ dataPoints.unshift([d.replace(' 2026',''),c,t,p,parseFloat(f)||'',"You"]);renderDP();alert('Market price posted: '+c+' · '+t+' · Rs '+p+'/L.');}
+
+// ============ LANDED COST ============
 let COSTSEL="BHW";
+function renderCostCenter(){document.getElementById('costCenter').innerHTML=CENTERS.map((c,i)=>`<button data-c="${c.code}" class="${i===0?'on':''}" onclick="selCost('${c.code}')">${c.name}</button>`).join('');}
 function selCost(code){COSTSEL=code;document.querySelectorAll('#costCenter button').forEach(b=>b.classList.toggle('on',b.dataset.c===code));
- const c=CENTERS.find(x=>x.code===code); const op=opexPerL(c);
+ const c=CENTERS.find(x=>x.code===code);const opv=opexVarPerL(c),opf=opexFixPerL(c);const buy=bNow(code,'All');const cust=custom[code]||[];const cu=cust.reduce((s,l)=>s+l[1],0);const land=buy+opv+cu;
  document.getElementById('costTitle').textContent=`${c.name} · cost to serve`;
- document.getElementById('glOpex').textContent=money(c.opex);
- document.getElementById('glVol').textContent=c.vol.toLocaleString()+" L";
- document.getElementById('glPerL').textContent=money1(op);
- const cust=custom[code]||[];
- const buy=c.base.Buffalo;
- const land=landed(code,"Buffalo");
+ document.getElementById('glOpex').textContent=money(c.opex);document.getElementById('glVol').textContent=c.vol.toLocaleString()+" L";
+ document.getElementById('glPerL').textContent=money1(opv);document.getElementById('glFix').textContent=money1(opf)+" /L excl.";
  document.getElementById('costStack').innerHTML=
-  `<div class="ln"><span>Buying price (Buffalo)</span><b class="mono">${money1(buy)}</b></div>`+
-  `<div class="ln"><span>+ Opex / litre (GL ÷ litres)</span><b class="mono">${money1(op)}</b></div>`+
+  `<div class="ln"><span>Raw buying (all-milk, ERP)</span><b class="mono">${money1(buy)}</b></div>`+
+  `<div class="ln"><span>+ Variable opex / litre</span><b class="mono">${money1(opv)}</b></div>`+
   cust.map((l,i)=>`<div class="ln"><span>+ ${l[0]}</span><b class="mono">${money1(l[1])} <span class="muted" onclick="rmLine(${i})" style="cursor:pointer">✕</span></b></div>`).join('')+
-  `<div class="ln tot"><span>Landed cost / litre</span><b class="mono up">${money1(land)}</b></div>`;
- document.getElementById('customLines').innerHTML=cust.map((l,i)=>`<div class="row" style="justify-content:space-between;padding:5px 0"><span>${l[0]}</span><span class="mono">${money1(l[1])} <span class="muted" onclick="rmLine(${i})" style="cursor:pointer">✕</span></span></div>`).join('')||'<div class="note">No custom lines yet.</div>';
- renderCostTable();
-}
-function addLine(){const l=document.getElementById('clLabel').value,v=parseFloat(document.getElementById('clVal').value);
- if(!l||isNaN(v))return; (custom[COSTSEL]=custom[COSTSEL]||[]).push([l,v]);document.getElementById('clLabel').value='';document.getElementById('clVal').value='';selCost(COSTSEL);}
+  `<div class="ln tot"><span>Landed cost / litre</span><b class="mono up">${money1(land)}</b></div>`+
+  `<div class="ln"><span class="muted">Fixed opex (excluded)</span><b class="mono muted">${money1(opf)} /L</b></div>`;
+ document.getElementById('customLines').innerHTML=cust.map((l,i)=>`<div class="row" style="justify-content:space-between;padding:5px 0"><span>${l[0]}</span><span class="mono">${money1(l[1])} <span class="muted" onclick="rmLine(${i})" style="cursor:pointer">✕</span></span></div>`).join('')||'<div class="note">No manual lines yet.</div>';
+ renderCostTable();}
+function addLine(){const l=document.getElementById('clLabel').value,v=parseFloat(document.getElementById('clVal').value);if(!l||isNaN(v))return;(custom[COSTSEL]=custom[COSTSEL]||[]).push([l,v]);document.getElementById('clLabel').value='';document.getElementById('clVal').value='';selCost(COSTSEL);}
 function rmLine(i){custom[COSTSEL].splice(i,1);selCost(COSTSEL);}
-function renderCostTable(){document.getElementById('costTable').innerHTML=CENTERS.map(c=>{
-  const op=opexPerL(c),cu=(custom[c.code]||[]).reduce((s,l)=>s+l[1],0),land=c.base.Buffalo+op+cu;
-  return `<tr><td>${c.name}</td><td class="mono">${money1(c.base.Buffalo)}</td><td class="mono">${money1(op)}</td><td class="mono">${money1(cu)}</td><td class="mono up"><b>${money1(land)}</b></td>
-   <td style="width:120px"><div class="bar"><span style="width:${Math.min(100,land/260*100)}%;background:var(--up)"></span></div></td></tr>`}).join('');}
+function renderCostTable(){document.getElementById('costTable').innerHTML=CENTERS.map(c=>{const buy=bNow(c.code,'All'),op=opexVarPerL(c),cu=(custom[c.code]||[]).reduce((s,l)=>s+l[1],0),land=buy+op+cu;
+  return `<tr><td>${c.name}</td><td class="mono">${money1(buy)}</td><td class="mono">${money1(op)}</td><td class="mono">${money1(cu)}</td><td class="mono up"><b>${money1(land)}</b></td><td style="width:100px"><div class="bar"><span style="width:${Math.min(100,land/260*100)}%;background:var(--up)"></span></div></td></tr>`;}).join('');}
 
-// ---------- deal desk (city delivery margins) ----------
+// ============ DEAL DESK ============
 let cityCh;
 function renderDealCenters(){document.getElementById('dCenter').innerHTML=CENTERS.map(c=>`<option value="${c.code}">${c.name}</option>`).join('');
- document.getElementById('pc').innerHTML=CENTERS.map(c=>`<option>${c.name}</option>`).join('');}
-function cityRows(){
- const type=document.getElementById('dType').value,
-   extra=parseFloat(document.getElementById('dExtra').value)||0,
-   code=document.getElementById('dCenter').value,
-   ov=parseFloat(document.getElementById('dOffer').value)||0;
- const land=landed(code,type);
- return SELLMKT.map(m=>{const sell=ov||m.price; const delivered=land+extra+m.logi; const mar=sell-delivered;
-   return {name:m.name,lat:m.lat,lng:m.lng,vol:m.vol,logi:m.logi,sell,delivered,land,extra,mar,pct:sell?mar/sell*100:0};});
-}
-function setLogi(idx,v){const n=parseFloat(v); if(isNaN(n))return; SELLMKT[idx].logi=n; calcCities();}
-function calcCities(){
- const vol=parseFloat(document.getElementById('dVol').value)||0,
-   code=document.getElementById('dCenter').value,
-   type=document.getElementById('dType').value;
- const c=CENTERS.find(x=>x.code===code);
- document.getElementById('srcName').textContent=c.name;
- const rows=cityRows();
- const ranked=[...rows].sort((a,b)=>b.mar-a.mar);
- const best=ranked[0];
- // best-city economics
+ document.getElementById('pc').innerHTML=CENTERS.map(c=>`<option>${c.name}</option>`).join('');
+ document.getElementById('bkCenter').innerHTML=CENTERS.map(c=>`<option value="${c.code}">${c.name}</option>`).join('');
+ document.getElementById('skMarket').innerHTML=SMKT.map(m=>`<option value="${m.code}">${m.name}</option>`).join('');}
+function landed(code,type){const c=CENTERS.find(x=>x.code===code);const cu=(custom[code]||[]).reduce((s,l)=>s+l[1],0);return c.base[type]+opexVarPerL(c)+cu;}
+function cityRows(){const type=document.getElementById('dType').value,extra=parseFloat(document.getElementById('dExtra').value)||0,code=document.getElementById('dCenter').value,ov=parseFloat(document.getElementById('dOffer').value)||0;
+ const land=landed(code,type);return SELLMKT.map(m=>{const sell=ov||m.price;const delivered=land+extra+m.logi;const mar=sell-delivered;return {name:m.name,lat:m.lat,lng:m.lng,vol:m.vol,logi:m.logi,sell,delivered,land,extra,mar,pct:sell?mar/sell*100:0};});}
+function setLogi(idx,v){const n=parseFloat(v);if(isNaN(n))return;SELLMKT[idx].logi=n;calcCities();}
+function calcCities(){const vol=parseFloat(document.getElementById('dVol').value)||0,code=document.getElementById('dCenter').value,type=document.getElementById('dType').value;const c=CENTERS.find(x=>x.code===code);
+ document.getElementById('srcName').textContent=c.name;const rows=cityRows();const ranked=[...rows].sort((a,b)=>b.mar-a.mar);const best=ranked[0];
  document.getElementById('bestTitle').textContent=`Best margin — ${best.name} · ${type} · ${vol.toLocaleString()} L/day`;
- const setKpi=(id,txt,pos)=>{const el=document.getElementById(id);el.textContent=txt;el.className="big mono "+(pos?'up':'down');};
- setKpi('bMarginL',money1(best.mar),best.mar>=0);
- setKpi('bMarginPct',best.pct.toFixed(1)+"%",best.mar>=0);
- setKpi('bGP',money(best.mar*vol),best.mar>=0);
+ const setK=(id,txt,pos)=>{const el=document.getElementById(id);el.textContent=txt;el.className="big mono "+(pos?'up':'down');};
+ setK('bMarginL',money1(best.mar),best.mar>=0);setK('bMarginPct',best.pct.toFixed(1)+"%",best.mar>=0);setK('bGP',money(best.mar*vol),best.mar>=0);
  document.getElementById('bGPm').textContent=money(best.mar*vol*30);
  document.getElementById('bStack').innerHTML=
   `<div class="ln"><span>Sell price (${best.name})</span><b class="mono">${money1(best.sell)}</b></div>`+
@@ -449,38 +651,28 @@ function calcCities(){
   `<div class="ln"><span>+ Logistics to ${best.name}</span><b class="mono down">${money1(best.logi)}</b></div>`+
   `<div class="ln"><span>= Delivered cost</span><b class="mono down">${money1(best.delivered)}</b></div>`+
   `<div class="ln tot"><span>Margin / litre</span><b class="mono ${best.mar>=0?'up':'down'}">${money1(best.mar)} (${best.pct.toFixed(1)}%)</b></div>`;
- // cities table (logistics editable inline)
- document.getElementById('cityBody').innerHTML=ranked.map((r,i)=>{
-  const idx=SELLMKT.findIndex(x=>x.name===r.name);
-  return `<tr${i===0?' style="background:rgba(0,200,5,.08)"':''}><td>${i+1}</td><td>${r.name}${i===0?' <span class="badge">BEST</span>':''}</td>`+
-   `<td class="mono">${money1(r.sell)}</td>`+
-   `<td><input class="mono" style="width:72px;padding:4px 6px" value="${r.logi}" onchange="setLogi(${idx},this.value)"></td>`+
-   `<td class="mono down">${money1(r.delivered)}</td>`+
-   `<td class="mono ${r.mar>=0?'up':'down'}">${money1(r.mar)}</td>`+
-   `<td class="mono ${r.mar>=0?'up':'down'}">${r.pct.toFixed(1)}%</td></tr>`;}).join('');
- // margin-by-city chart
- const ctx=document.getElementById('cityChart'); if(cityCh)cityCh.destroy();
- cityCh=new Chart(ctx,{type:'bar',data:{labels:ranked.map(r=>r.name),datasets:[{data:ranked.map(r=>+r.mar.toFixed(1)),backgroundColor:ranked.map(r=>r.mar>=0?'#00C805':'#FF4D4D'),borderRadius:6}]},
-  options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>'Margin Rs '+x.raw+'/L'}}},scales:{x:{grid:{display:false},ticks:{color:'#7C8B9A'}},y:{grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}}}});
- // map
- drawSellMap(rows);
-}
+ document.getElementById('cityBody').innerHTML=ranked.map((r,i)=>{const idx=SELLMKT.findIndex(x=>x.name===r.name);
+  return `<tr${i===0?' style="background:rgba(76,183,130,.10)"':''}><td>${i+1}</td><td>${r.name}${i===0?' <span class="badge">BEST</span>':''}</td><td class="mono">${money1(r.sell)}</td><td><input class="mono" style="width:70px;padding:4px 6px" value="${r.logi}" onchange="setLogi(${idx},this.value)"></td><td class="mono down">${money1(r.delivered)}</td><td class="mono ${r.mar>=0?'up':'down'}">${money1(r.mar)}</td><td class="mono ${r.mar>=0?'up':'down'}">${r.pct.toFixed(1)}%</td></tr>`;}).join('');
+ const ctx=document.getElementById('cityChart');if(cityCh)cityCh.destroy();
+ cityCh=new Chart(ctx,{type:'bar',data:{labels:ranked.map(r=>r.name),datasets:[{data:ranked.map(r=>+r.mar.toFixed(1)),backgroundColor:ranked.map(r=>r.mar>=0?'#4CB782':'#EB5757'),borderRadius:6}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>'Margin Rs '+x.raw+'/L'}}},scales:{x:{grid:{display:false},ticks:{color:'#7C8B9A'}},y:{grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}}}});
+ drawSellMap(rows);}
 
-// ---------- tabs ----------
-document.getElementById('nav').addEventListener('click',e=>{const t=e.target.dataset.tab;if(!t)return;
- document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
- document.querySelectorAll('.tabpane').forEach(p=>p.classList.add('hide'));
- document.getElementById('tab-'+t).classList.remove('hide');
- if(t==='deal'){initSellMap();calcCities();setTimeout(()=>{if(sellMapObj)sellMapObj.invalidateSize();},120);}
- if(t==='cost')selCost(COSTSEL);
- if(t==='market'&&buyMapObj)setTimeout(()=>buyMapObj.invalidateSize(),80);});
-document.getElementById('tf').addEventListener('click',e=>{if(!e.target.dataset.d)return;SEL.d=+e.target.dataset.d;
- document.querySelectorAll('#tf button').forEach(b=>b.classList.toggle('on',b===e.target));renderChart();});
-document.getElementById('typeSel').addEventListener('click',e=>{if(!e.target.dataset.t)return;SEL.t=e.target.dataset.t;MAPT=SEL.t;
- document.querySelectorAll('#typeSel button').forEach(b=>b.classList.toggle('on',b===e.target));renderTicker();renderChart();renderKpi();renderSpread();if(buyMapObj)drawBuyMap();});
+// ============ ADMIN ============
+function renderAdmin(){document.getElementById('adBuy').value=ADMIN.buyCeil;document.getElementById('adSell').value=ADMIN.sellFloor;
+ document.getElementById('adGoodAbs').value=ADMIN.goodAbs;document.getElementById('adGoodPct').value=ADMIN.goodPct;
+ document.getElementById('adBadAbs').value=ADMIN.badAbs;document.getElementById('adBadPct').value=ADMIN.badPct;}
+function saveAdmin(){const g=id=>parseFloat(document.getElementById(id).value);
+ if(!isNaN(g('adBuy')))ADMIN.buyCeil=g('adBuy');if(!isNaN(g('adSell')))ADMIN.sellFloor=g('adSell');
+ if(!isNaN(g('adGoodAbs')))ADMIN.goodAbs=g('adGoodAbs');if(!isNaN(g('adGoodPct')))ADMIN.goodPct=g('adGoodPct');
+ if(!isNaN(g('adBadAbs')))ADMIN.badAbs=g('adBadAbs');if(!isNaN(g('adBadPct')))ADMIN.badPct=g('adBadPct');
+ document.getElementById('adStatus').innerHTML='Settings applied — thresholds live in both calculators';}
 
-// init
-renderDealCenters();renderTicker();renderChart();renderKpi();renderSpread();renderDP();renderCostCenter();calcCities();
-setTimeout(initBuyMap,200);
+// ============ listeners + init ============
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!b.dataset.tab)return;switchTab(b.dataset.tab);});
+document.getElementById('fltBuy').addEventListener('click',e=>{if(e.target.dataset.f)setFlt(e.target.dataset.f);});
+document.getElementById('fltSell').addEventListener('click',e=>{if(e.target.dataset.f)setFlt(e.target.dataset.f);});
+document.getElementById('tf').addEventListener('click',e=>{if(!e.target.dataset.d)return;SEL.d=+e.target.dataset.d;document.querySelectorAll('#tf button').forEach(b=>b.classList.toggle('on',b===e.target));renderChart();});
+
+renderDealCenters();renderCostCenter();calcCities();document.getElementById('skLogiVal').value=SMKT[0].logi;renderBuy();
 </script>
 </body></html>
