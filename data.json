@@ -1,22 +1,8 @@
 {
- "asOf": "2026-09-08 14:48 UTC",
- "source": "Frappe Cloud replica \u2014 Milk Pricing/Dispatch (buy) + Milk Sale (sell)",
+ "asOf": "2026-09-08 15:27 UTC",
+ "source": "Frappe Cloud replica \u2014 Milk Supplier Deposit (buy, actual paid) + Milk Sale (sell)",
  "buy": {
   "centres": [
-   {
-    "code": "LOC-000356",
-    "name": "MCC Kachain (Kala Bali)",
-    "lat": 30.372875188,
-    "lng": 69.301757813,
-    "types": {
-     "Mix": {
-      "price": 145.0,
-      "base": 145.0,
-      "ts": null,
-      "vol": 200
-     }
-    }
-   },
    {
     "code": "LOC-000503",
     "name": "MCC Ubhaan",
@@ -24,20 +10,20 @@
     "lng": 69.301757813,
     "types": {
      "Buffalo": {
-      "price": 165.7,
-      "base": 153.5,
-      "ts": 14.03,
-      "vol": 55
+      "price": 196.4,
+      "base": 196.4,
+      "ts": 16.78,
+      "vol": 60
      },
      "Cow": {
-      "price": 144.7,
-      "base": 153.5,
-      "ts": 12.25,
-      "vol": 51
+      "price": 146.7,
+      "base": 146.7,
+      "ts": 12.55,
+      "vol": 58
      }
     },
-    "opexVarPerL": 15.2,
-    "opexFixedPerL": 33.82
+    "opexVarPerL": 9.19,
+    "opexFixedPerL": 20.46
    },
    {
     "code": "LOC-000526",
@@ -46,20 +32,20 @@
     "lng": 72.592326,
     "types": {
      "Buffalo": {
-      "price": 168.2,
-      "base": 153.5,
-      "ts": 14.24,
-      "vol": 20
+      "price": 171.0,
+      "base": 171.0,
+      "ts": 14.49,
+      "vol": 53
      },
      "Cow": {
-      "price": 147.2,
-      "base": 153.5,
-      "ts": 12.47,
-      "vol": 145
+      "price": 143.8,
+      "base": 143.8,
+      "ts": 12.29,
+      "vol": 205
      }
     },
-    "opexVarPerL": 5.92,
-    "opexFixedPerL": 16.21
+    "opexVarPerL": 3.15,
+    "opexFixedPerL": 8.61
    },
    {
     "code": "LOC-000532",
@@ -68,20 +54,20 @@
     "lng": 69.301757813,
     "types": {
      "Buffalo": {
-      "price": 157.9,
-      "base": 153.5,
-      "ts": 13.37,
-      "vol": 229
+      "price": 166.4,
+      "base": 166.4,
+      "ts": 14.07,
+      "vol": 177
      },
      "Cow": {
-      "price": 143.7,
-      "base": 153.5,
-      "ts": 12.17,
-      "vol": 1119
+      "price": 148.9,
+      "base": 148.9,
+      "ts": 12.61,
+      "vol": 1835
      }
     },
-    "opexVarPerL": 10.31,
-    "opexFixedPerL": 3.24
+    "opexVarPerL": 5.36,
+    "opexFixedPerL": 1.68
    },
    {
     "code": "LOC-000784",
@@ -90,20 +76,20 @@
     "lng": 69.301757813,
     "types": {
      "Buffalo": {
-      "price": 165.2,
-      "base": 153.5,
-      "ts": 13.99,
-      "vol": 94
+      "price": 165.6,
+      "base": 165.6,
+      "ts": 13.95,
+      "vol": 132
      },
      "Cow": {
-      "price": 148.8,
-      "base": 153.5,
-      "ts": 12.6,
-      "vol": 172
+      "price": 148.3,
+      "base": 148.3,
+      "ts": 12.55,
+      "vol": 235
      }
     },
-    "opexVarPerL": 2.36,
-    "opexFixedPerL": 38.12
+    "opexVarPerL": 1.35,
+    "opexFixedPerL": 21.88
    },
    {
     "code": "LOC-000816",
@@ -112,34 +98,25 @@
     "lng": 69.3451,
     "types": {
      "Buffalo": {
-      "price": 153.5,
-      "base": 153.5,
-      "ts": null,
-      "vol": 200
+      "price": 164.0,
+      "base": 164.0,
+      "ts": 13.76,
+      "vol": 71
      },
      "Cow": {
-      "price": 153.5,
-      "base": 153.5,
-      "ts": null,
-      "vol": 200
-     },
-     "Mix": {
-      "price": 153.5,
-      "base": 153.5,
-      "ts": null,
-      "vol": 200
+      "price": 152.3,
+      "base": 152.3,
+      "ts": 12.77,
+      "vol": 218
      }
-    }
+    },
+    "opexVarPerL": 31.99,
+    "opexFixedPerL": 4.04
    }
   ],
-  "company30": 149.12,
+  "company30": 152.13,
   "series": {
    "weeks": [
-    "09 Feb",
-    "16 Feb",
-    "23 Feb",
-    "02 Mar",
-    "09 Mar",
     "16 Mar",
     "23 Mar",
     "30 Mar",
@@ -158,123 +135,157 @@
     "29 Jun",
     "06 Jul",
     "13 Jul",
-    "20 Jul"
+    "20 Jul",
+    "27 Jul",
+    "03 Aug",
+    "10 Aug",
+    "17 Aug",
+    "24 Aug",
+    "31 Aug",
+    "07 Sep"
    ],
    "company": [
-    153.0,
-    151.1,
-    152.0,
-    153.0,
+    154.9,
+    154.8,
+    154.5,
+    154.5,
+    154.3,
+    153.4,
     153.1,
-    150.8,
+    153.5,
+    153.1,
+    152.5,
+    151.4,
+    152.2,
+    152.1,
+    151.9,
+    151.7,
+    151.9,
+    151.8,
+    151.5,
+    151.6,
     153.2,
-    152.3,
-    152.9,
-    152.8,
+    154.8,
+    155.5,
+    156.1,
+    152.4,
     151.2,
-    149.9,
-    150.3,
-    149.9,
-    148.6,
-    147.8,
-    148.2,
-    149.0,
-    149.5,
-    147.6,
-    149.0,
-    148.4,
-    148.2,
-    147.4
+    146.8
+   ],
+   "vol": [
+    53156,
+    57056,
+    58258,
+    63614,
+    62624,
+    60429,
+    54232,
+    52229,
+    49003,
+    46519,
+    43654,
+    37714,
+    32909,
+    32306,
+    29461,
+    29468,
+    28407,
+    27146,
+    24792,
+    33405,
+    36706,
+    35020,
+    26398,
+    20621,
+    20193,
+    5440
    ],
    "byCentre": {
     "LOC-000503": [
-     163.1,
-     165.1,
-     160.2,
-     161.3,
-     155.7,
-     157.0,
-     159.2,
-     161.4,
-     160.7,
-     161.8,
+     160.0,
+     161.6,
+     160.4,
+     161.0,
+     160.6,
      159.5,
-     156.7,
-     159.5,
-     156.5,
-     151.8,
-     151.7,
-     153.7,
-     153.6,
-     155.6,
-     155.9,
-     157.4,
-     158.7,
-     157.5,
-     153.2
+     158.6,
+     160.6,
+     156.6,
+     153.1,
+     151.6,
+     153.8,
+     152.8,
+     153.9,
+     155.8,
+     156.6,
+     158.4,
+     157.8,
+     152.5,
+     153.1,
+     153.1,
+     217.8,
+     155.2,
+     154.4,
+     156.6,
+     158.3
     ],
     "LOC-000526": [
-     155.5,
-     150.6,
-     151.5,
-     154.2,
-     154.5,
-     153.6,
-     152.5,
-     158.5,
-     155.3,
-     154.3,
-     155.8,
-     155.4,
-     155.5,
+     153.9,
+     156.3,
+     158.2,
+     158.2,
+     157.9,
+     157.3,
+     157.1,
+     157.7,
      155.9,
-     154.1,
+     155.2,
+     152.2,
      150.6,
-     148.5,
-     150.4,
+     148.2,
+     148.2,
+     148.0,
      148.8,
-     150.7,
-     150.6,
-     150.1,
-     147.9,
-     140.5
+     148.6,
+     148.0,
+     147.3,
+     147.6,
+     147.6,
+     148.9,
+     149.3,
+     149.0,
+     150.3,
+     150.1
     ],
     "LOC-000532": [
-     151.2,
-     149.8,
+     152.6,
+     152.1,
+     152.3,
+     151.9,
+     151.5,
+     151.0,
+     150.8,
+     150.6,
+     151.0,
+     151.1,
+     150.5,
      151.4,
-     149.6,
-     148.3,
-     148.5,
-     149.2,
-     149.0,
+     151.5,
+     151.1,
+     150.8,
+     151.6,
+     151.4,
+     151.0,
+     151.7,
+     150.7,
+     151.0,
      150.9,
-     149.7,
-     148.5,
-     146.8,
-     147.0,
-     146.6,
-     146.1,
-     145.7,
-     146.1,
-     147.2,
-     147.6,
-     145.2,
-     147.2,
-     146.6,
-     146.8,
-     146.8
+     151.1,
+     151.8,
+     149.8,
+     143.0
     ],
-    "LOC-000538": [
-     null,
-     null,
-     null,
-     null,
-     null,
-     null,
-     null,
-     null,
-     144.0,
+    "LOC-000542": [
      null,
      null,
      null,
@@ -284,6 +295,17 @@
      null,
      null,
      null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     159.3,
      null,
      null,
      null,
@@ -292,30 +314,286 @@
      null
     ],
     "LOC-000784": [
-     156.3,
-     160.0,
-     null,
-     160.2,
-     162.1,
-     162.8,
      161.8,
-     157.9,
-     157.0,
-     157.4,
-     154.3,
-     155.8,
-     157.7,
+     161.1,
+     158.4,
+     158.6,
+     158.5,
+     156.3,
+     157.8,
+     159.7,
+     158.8,
      157.1,
-     154.7,
-     153.1,
-     153.6,
-     153.8,
-     155.5,
-     155.5,
+     155.6,
+     155.8,
+     157.0,
+     156.7,
+     156.7,
+     153.9,
+     153.3,
+     154.4,
+     154.2,
+     150.0,
+     153.9,
+     155.0,
+     154.9,
+     155.1,
      154.1,
-     153.1,
-     153.5,
-     153.3
+     152.0
+    ],
+    "LOC-000802": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     161.0,
+     157.5,
+     173.1,
+     null,
+     null,
+     null
+    ],
+    "LOC-000816": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     153.4,
+     154.7,
+     156.0,
+     156.3,
+     156.8
+    ]
+   },
+   "byCentreVol": {
+    "LOC-000503": [
+     5119,
+     5945,
+     5634,
+     6458,
+     6844,
+     6635,
+     5552,
+     5334,
+     5038,
+     4817,
+     3822,
+     3525,
+     2738,
+     2197,
+     1481,
+     1512,
+     1368,
+     1272,
+     1029,
+     1006,
+     818,
+     932,
+     865,
+     703,
+     818,
+     184
+    ],
+    "LOC-000526": [
+     2730,
+     3166,
+     4348,
+     5987,
+     6400,
+     5913,
+     5338,
+     5235,
+     4752,
+     4002,
+     3704,
+     3270,
+     2962,
+     2764,
+     2392,
+     2752,
+     2450,
+     2222,
+     2041,
+     1948,
+     1890,
+     1962,
+     1767,
+     1683,
+     1744,
+     458
+    ],
+    "LOC-000532": [
+     36714,
+     38562,
+     39056,
+     40928,
+     39006,
+     38846,
+     36236,
+     34807,
+     32340,
+     31140,
+     30430,
+     25274,
+     22522,
+     22564,
+     21612,
+     21013,
+     20764,
+     20286,
+     19130,
+     17437,
+     17610,
+     14183,
+     13846,
+     13756,
+     13351,
+     3479
+    ],
+    "LOC-000542": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     10299,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "LOC-000784": [
+     8594,
+     9384,
+     9220,
+     10242,
+     10374,
+     9034,
+     7105,
+     6853,
+     6872,
+     6560,
+     5697,
+     5645,
+     4686,
+     4781,
+     3976,
+     4190,
+     3824,
+     3366,
+     2592,
+     2714,
+     2572,
+     2559,
+     2585,
+     2492,
+     2476,
+     737
+    ],
+    "LOC-000802": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     13815,
+     13266,
+     5144,
+     null,
+     null,
+     null
+    ],
+    "LOC-000816": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     2118,
+     2190,
+     1987,
+     1804,
+     582
     ]
    }
   }
@@ -330,7 +608,7 @@
     "types": {
      "Mix": {
       "price": 167.0,
-      "vol": 22
+      "vol": 66
      }
     }
    },
@@ -342,7 +620,7 @@
     "types": {
      "Mix": {
       "price": 167.0,
-      "vol": 50
+      "vol": 149
      }
     }
    },
@@ -353,8 +631,8 @@
     "lng": 69.301757813,
     "types": {
      "Mix": {
-      "price": 160.7,
-      "vol": 486
+      "price": 167.0,
+      "vol": 1173
      }
     }
    },
@@ -366,7 +644,7 @@
     "types": {
      "Mix": {
       "price": 167.0,
-      "vol": 80
+      "vol": 227
      }
     }
    },
@@ -378,7 +656,7 @@
     "types": {
      "Mix": {
       "price": 167.0,
-      "vol": 56
+      "vol": 168
      }
     }
    }
@@ -402,6 +680,15 @@
     167.0,
     167.0,
     167.0
+   ],
+   "vol": [
+    4009,
+    1279,
+    8895,
+    6335,
+    20506,
+    20483,
+    6161
    ],
    "byMarket": {
     "LOC-000503": [
@@ -449,12 +736,59 @@
      167.0,
      167.0
     ]
+   },
+   "byMarketVol": {
+    "LOC-000503": [
+     null,
+     null,
+     null,
+     218,
+     707,
+     807,
+     236
+    ],
+    "LOC-000526": [
+     null,
+     null,
+     null,
+     497,
+     1643,
+     1688,
+     654
+    ],
+    "LOC-000532": [
+     4009,
+     1279,
+     8532,
+     3863,
+     13608,
+     13715,
+     3994
+    ],
+    "LOC-000784": [
+     null,
+     null,
+     363,
+     1127,
+     2526,
+     2459,
+     708
+    ],
+    "LOC-000816": [
+     null,
+     null,
+     null,
+     630,
+     2022,
+     1814,
+     569
+    ]
    }
   }
  },
  "notes": {
-  "buying": "Effective rate = Milk Pricing base_price x (avg TS / 13), per centre x type, using clean TS from Milk Dispatch (last 120d); volume-weighted by dispatch litres. Varies by quality (Buffalo>Cow). Still no day-by-day history, so the rolling line reflects current quality/mix, not a negotiated-price time series.",
+  "buying": "Actual paid price/L = SUM(total_payable_amount)/SUM(milk_volume) from Milk Supplier Deposit (child of Milk Collections) \u2014 the live intake table, current to today. Dispatch/Receive were retired ~20 Jul 2026. Weekly series is the true paid price.",
   "market_competitor": "Not in ERP \u2014 agent-posted; left to the app.",
-  "opex": "opexPerL = expense GL on the MCC cost centre EXCLUDING Cost of Goods Sold, over last 90d, / dispatched litres. Total operating opex (fixed+variable together) until accounts are tagged fixed/variable."
+  "opex": "Expense GL on the MCC cost centre EXCLUDING Cost of Goods Sold, last 90d, split fixed/variable by account name, / live intake litres."
  }
 }
