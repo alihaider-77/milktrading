@@ -64,6 +64,21 @@ def main():
     for r in cur.fetchall():
         vol.setdefault(r["code"], {})[norm_type(r["milk_type"])] = float(r["vol"] or 0) / 90.0  # daily litres
 
+    # average total-solids % per centre x type (clean 'ts' column; used to TS-adjust the paid rate)
+    cur.execute("""SELECT collection_centre cc, milk_type mt, AVG(NULLIF(weighted_average_of_ts,0)) ts
+                   FROM `tabMilk Dispatch` WHERE docstatus<2 AND collection_centre LIKE 'LOC-%%'
+                     AND creation>=DATE_SUB(NOW(), INTERVAL 120 DAY)
+                   GROUP BY collection_centre, milk_type""")
+    tsmap = {}
+    for r in cur.fetchall():
+        if r["ts"]:
+            tsmap.setdefault(r["cc"], {})[norm_type(r["mt"])] = float(r["ts"])
+
+    def eff(base, code, t):
+        """Effective paid rate = base (rate at TS13) x actual TS / 13. Falls back to base if no TS."""
+        ts = tsmap.get(code, {}).get(t)
+        return (round(base * ts / 13.0, 1), round(base, 1), round(ts, 2)) if ts else (round(base, 1), round(base, 1), None)
+
     centres = []
     for code, ptypes in price.items():
         if code not in loc:
@@ -73,10 +88,12 @@ def main():
             p = ptypes.get(t)
             v = vol.get(code, {}).get(t, 0)
             if p and v > 0:
-                types[t] = {"price": round(p, 1), "vol": round(v)}
+                pr, base, ts = eff(p, code, t)
+                types[t] = {"price": pr, "base": base, "ts": ts, "vol": round(v)}
         if not types:  # priced but no recent tagged volume — still show at nominal small volume
             for t, p in ptypes.items():
-                types[t] = {"price": round(p, 1), "vol": 200}
+                pr, base, ts = eff(p, code, t)
+                types[t] = {"price": pr, "base": base, "ts": ts, "vol": 200}
         centres.append({
             "code": code, "name": loc[code]["location_name"] or code,
             "lat": float(loc[code]["latitude"] or 0) or None,
@@ -155,7 +172,7 @@ def main():
         "buy": {"centres": centres, "company30": company(30, centres)},
         "sell": {"markets": markets, "company30": round(float(sell30), 2) if sell30 else None},
         "notes": {
-            "buying": "Rate = Milk Pricing base_price (TS-based master), volume-weighted by Milk Dispatch litres (last 90d). No historical price series yet, so buying trend is flat until price history is captured.",
+            "buying": "Effective rate = Milk Pricing base_price x (avg TS / 13), per centre x type, using clean TS from Milk Dispatch (last 120d); volume-weighted by dispatch litres. Varies by quality (Buffalo>Cow). Still no day-by-day history, so the rolling line reflects current quality/mix, not a negotiated-price time series.",
             "market_competitor": "Not in ERP — agent-posted; left to the app.",
             "opex": "opexPerL = expense GL on the MCC cost centre EXCLUDING Cost of Goods Sold, over last 90d, / dispatched litres. Total operating opex (fixed+variable together) until accounts are tagged fixed/variable.",
         },

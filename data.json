@@ -1,5 +1,5 @@
 {
- "asOf": "2026-09-08 14:20 UTC",
+ "asOf": "2026-09-08 14:35 UTC",
  "source": "Frappe Cloud replica \u2014 Milk Pricing/Dispatch (buy) + Milk Sale (sell)",
  "buy": {
   "centres": [
@@ -11,6 +11,8 @@
     "types": {
      "Mix": {
       "price": 145.0,
+      "base": 145.0,
+      "ts": null,
       "vol": 200
      }
     }
@@ -22,11 +24,15 @@
     "lng": 69.301757813,
     "types": {
      "Buffalo": {
-      "price": 153.5,
+      "price": 165.7,
+      "base": 153.5,
+      "ts": 14.03,
       "vol": 57
      },
      "Cow": {
-      "price": 153.5,
+      "price": 144.7,
+      "base": 153.5,
+      "ts": 12.25,
       "vol": 53
      }
     },
@@ -40,11 +46,15 @@
     "lng": 72.592326,
     "types": {
      "Buffalo": {
-      "price": 153.5,
+      "price": 168.2,
+      "base": 153.5,
+      "ts": 14.24,
       "vol": 20
      },
      "Cow": {
-      "price": 153.5,
+      "price": 147.2,
+      "base": 153.5,
+      "ts": 12.47,
       "vol": 145
      }
     },
@@ -58,11 +68,15 @@
     "lng": 69.301757813,
     "types": {
      "Buffalo": {
-      "price": 153.5,
+      "price": 157.9,
+      "base": 153.5,
+      "ts": 13.37,
       "vol": 229
      },
      "Cow": {
-      "price": 153.5,
+      "price": 143.7,
+      "base": 153.5,
+      "ts": 12.17,
       "vol": 1119
      }
     },
@@ -76,11 +90,15 @@
     "lng": 69.301757813,
     "types": {
      "Buffalo": {
-      "price": 153.5,
+      "price": 165.2,
+      "base": 153.5,
+      "ts": 13.99,
       "vol": 94
      },
      "Cow": {
-      "price": 153.5,
+      "price": 148.8,
+      "base": 153.5,
+      "ts": 12.6,
       "vol": 172
      }
     },
@@ -95,20 +113,26 @@
     "types": {
      "Buffalo": {
       "price": 153.5,
+      "base": 153.5,
+      "ts": null,
       "vol": 200
      },
      "Cow": {
       "price": 153.5,
+      "base": 153.5,
+      "ts": null,
       "vol": 200
      },
      "Mix": {
       "price": 153.5,
+      "base": 153.5,
+      "ts": null,
       "vol": 200
      }
     }
    }
   ],
-  "company30": 152.87
+  "company30": 149.13
  },
  "sell": {
   "markets": [
@@ -176,7 +200,7 @@
   "company30": 167.0
  },
  "notes": {
-  "buying": "Rate = Milk Pricing base_price (TS-based master), volume-weighted by Milk Dispatch litres (last 90d). No historical price series yet, so buying trend is flat until price history is captured.",
+  "buying": "Effective rate = Milk Pricing base_price x (avg TS / 13), per centre x type, using clean TS from Milk Dispatch (last 120d); volume-weighted by dispatch litres. Varies by quality (Buffalo>Cow). Still no day-by-day history, so the rolling line reflects current quality/mix, not a negotiated-price time series.",
   "market_competitor": "Not in ERP \u2014 agent-posted; left to the app.",
   "opex": "opexPerL = expense GL on the MCC cost centre EXCLUDING Cost of Goods Sold, over last 90d, / dispatched litres. Total operating opex (fixed+variable together) until accounts are tagged fixed/variable."
  }

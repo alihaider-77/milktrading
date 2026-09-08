@@ -147,7 +147,7 @@ label{font-size:11px;color:var(--mut);font-weight:500;display:block;margin-botto
 
       <div class="grid two" style="margin-top:12px">
         <div class="card">
-          <div><h3>30-day rolling buying price — company &amp; by centre</h3><div class="note">Company average (thick) vs each centre. Lower is better.</div></div>
+          <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div><h3>30-day rolling buying price — company &amp; by centre</h3><div class="note">Company average (thick) vs each centre. Lower is better.</div></div><div class="seg" id="tfBuy"><button data-t="7">7D</button><button data-t="14">14D</button><button data-t="30">30D</button><button data-t="90" class="on">3M</button><button data-t="180">6M</button><button data-t="365">12M</button></div></div>
           <canvas id="deskChart" height="150" style="margin-top:8px"></canvas>
           <div class="row" id="deskCenters" style="gap:6px;margin-top:10px"></div>
         </div>
@@ -214,7 +214,7 @@ label{font-size:11px;color:var(--mut);font-weight:500;display:block;margin-botto
 
       <div class="grid two" style="margin-top:12px">
         <div class="card">
-          <div><h3>30-day rolling selling price — company &amp; by market</h3><div class="note">Company average (thick) vs each market. Higher is better.</div></div>
+          <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div><h3>30-day rolling selling price — company &amp; by market</h3><div class="note">Company average (thick) vs each market. Higher is better.</div></div><div class="seg" id="tfSell"><button data-t="7">7D</button><button data-t="14">14D</button><button data-t="30">30D</button><button data-t="90" class="on">3M</button><button data-t="180">6M</button><button data-t="365">12M</button></div></div>
           <canvas id="sellChart" height="150" style="margin-top:8px"></canvas>
           <div class="row" id="sellCenters" style="gap:6px;margin-top:10px"></div>
         </div>
@@ -408,6 +408,7 @@ let SMKT=[
  {code:"GUJ",name:"Gujranwala",lat:32.1877,lng:74.1945,base:{Buffalo:255,Cow:228,Mix:242},vol:2500,logi:12},
 ];
 const TYPES=["Buffalo","Cow","Mix"];
+const N=400;
 const TSHARE={Buffalo:0.55,Cow:0.30,Mix:0.15};
 let CCOL={BHW:'#5E6AD2',MHB:'#4CB782',UBH:'#E2B340',TRS:'#EB5757'};
 let SCOL={LHR:'#5E6AD2',FSD:'#4CB782',SGD:'#E2B340',ISB:'#B08CFF',MUL:'#F2994A',GUJ:'#56CCF2'};
@@ -416,10 +417,10 @@ const custom={BHW:[["Chilling",5],["Transport",8]],MHB:[["Chilling",5],["Transpo
 const ADMIN={buyCeil:205,sellFloor:250,goodAbs:0.30,goodPct:0.12,badAbs:0.30,badPct:0.12};
 
 function series(base,days){let a=[],p=base-6;for(let i=0;i<days;i++){p+=(Math.sin(i/3)*1.4)+((Math.random()-0.48)*3);p=Math.max(base-14,Math.min(base+8,p));a.push(+p.toFixed(1));}a[a.length-1]=base;return a;}
-let DATA={};CENTERS.forEach(c=>{DATA[c.code]={};TYPES.forEach(t=>DATA[c.code][t]=series(c.base[t],90));});
+let DATA={};CENTERS.forEach(c=>{DATA[c.code]={};TYPES.forEach(t=>DATA[c.code][t]=series(c.base[t],N));});
 let MKT={};CENTERS.forEach(c=>{MKT[c.code]={};TYPES.forEach(t=>{MKT[c.code][t]=DATA[c.code][t].map((v,i)=>+(v+2.5+Math.sin(i/2.5)*2.2+Math.random()*4).toFixed(1));});});
 let VOL={};CENTERS.forEach(c=>{VOL[c.code]={};TYPES.forEach(t=>{const d=c.vol/30*TSHARE[t];VOL[c.code][t]=DATA[c.code][t].map(()=>Math.round(d*(0.8+Math.random()*0.4)));});});
-let SDATA={};SMKT.forEach(m=>{SDATA[m.code]={};TYPES.forEach(t=>SDATA[m.code][t]=series(m.base[t],90));});
+let SDATA={};SMKT.forEach(m=>{SDATA[m.code]={};TYPES.forEach(t=>SDATA[m.code][t]=series(m.base[t],N));});
 let SVOL={};SMKT.forEach(m=>{SVOL[m.code]={};TYPES.forEach(t=>{const d=m.vol/30*TSHARE[t];SVOL[m.code][t]=SDATA[m.code][t].map(()=>Math.round(d*(0.8+Math.random()*0.4)));});});
 
 const money=n=>"Rs "+Math.round(n).toLocaleString();
@@ -428,20 +429,20 @@ function opexVarPerL(c){return c.opex*(1-c.fixPct)/c.vol;}
 function opexFixPerL(c){return c.opex*c.fixPct/c.vol;}
 const typesOf=f=>f==='All'?TYPES:[f];
 // ---- buying rolling (raw, volume-weighted, supports 'All') ----
-function bRoll(code,f,win,end){const ts=typesOf(f);const e=end==null?89:end;let a=0,v=0;ts.forEach(t=>{const p=DATA[code][t],l=VOL[code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}});return v?a/v:0;}
-function bSeries(code,f,win){const o=[];for(let e=win-1;e<90;e++)o.push(+bRoll(code,f,win,e).toFixed(1));return o;}
-function bOrg(f,win,end){const ts=typesOf(f);const e=end==null?89:end;let a=0,v=0;CENTERS.forEach(c=>ts.forEach(t=>{const p=DATA[c.code][t],l=VOL[c.code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}}));return v?a/v:0;}
-function bOrgSeries(f,win){const o=[];for(let e=win-1;e<90;e++)o.push(+bOrg(f,win,e).toFixed(1));return o;}
-function bPool(win){let a=0,v=0;CENTERS.forEach(c=>TYPES.forEach(t=>{const p=DATA[c.code][t],l=VOL[c.code][t];for(let i=90-win;i<90;i++){a+=p[i]*l[i];v+=l[i];}}));return{amt:a,lit:v};}
-function bNow(code,f){const ts=typesOf(f);let a=0,v=0;ts.forEach(t=>{a+=DATA[code][t][89]*VOL[code][t][89];v+=VOL[code][t][89];});return v?a/v:0;}
-function mNow(code,f){const ts=typesOf(f);let a=0,v=0;ts.forEach(t=>{a+=MKT[code][t][89]*VOL[code][t][89];v+=VOL[code][t][89];});return v?a/v:0;}
-function bDaySeries(obj,code,f){const o=[];for(let i=0;i<90;i++){const ts=typesOf(f);let a=0,v=0;ts.forEach(t=>{a+=obj[code][t][i]*VOL[code][t][i];v+=VOL[code][t][i];});o.push(+(v?a/v:0).toFixed(1));}return o;}
+function bRoll(code,f,win,end){const ts=typesOf(f);const e=end==null?N-1:end;let a=0,v=0;ts.forEach(t=>{const p=DATA[code][t],l=VOL[code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}});return v?a/v:0;}
+function bSeries(code,f,win){const o=[];for(let e=win-1;e<N;e++)o.push(+bRoll(code,f,win,e).toFixed(1));return o;}
+function bOrg(f,win,end){const ts=typesOf(f);const e=end==null?N-1:end;let a=0,v=0;CENTERS.forEach(c=>ts.forEach(t=>{const p=DATA[c.code][t],l=VOL[c.code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}}));return v?a/v:0;}
+function bOrgSeries(f,win){const o=[];for(let e=win-1;e<N;e++)o.push(+bOrg(f,win,e).toFixed(1));return o;}
+function bPool(win){let a=0,v=0;CENTERS.forEach(c=>TYPES.forEach(t=>{const p=DATA[c.code][t],l=VOL[c.code][t];for(let i=N-win;i<N;i++){a+=p[i]*l[i];v+=l[i];}}));return{amt:a,lit:v};}
+function bNow(code,f){const ts=typesOf(f);let a=0,v=0;ts.forEach(t=>{a+=DATA[code][t][N-1]*VOL[code][t][N-1];v+=VOL[code][t][N-1];});return v?a/v:0;}
+function mNow(code,f){const ts=typesOf(f);let a=0,v=0;ts.forEach(t=>{a+=MKT[code][t][N-1]*VOL[code][t][N-1];v+=VOL[code][t][N-1];});return v?a/v:0;}
+function bDaySeries(obj,code,f){const o=[];for(let i=0;i<N;i++){const ts=typesOf(f);let a=0,v=0;ts.forEach(t=>{a+=obj[code][t][i]*VOL[code][t][i];v+=VOL[code][t][i];});o.push(+(v?a/v:0).toFixed(1));}return o;}
 // ---- selling rolling ----
-function sRoll(code,f,win,end){const ts=typesOf(f);const e=end==null?89:end;let a=0,v=0;ts.forEach(t=>{const p=SDATA[code][t],l=SVOL[code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}});return v?a/v:0;}
-function sSeries(code,f,win){const o=[];for(let e=win-1;e<90;e++)o.push(+sRoll(code,f,win,e).toFixed(1));return o;}
-function sOrg(f,win,end){const ts=typesOf(f);const e=end==null?89:end;let a=0,v=0;SMKT.forEach(m=>ts.forEach(t=>{const p=SDATA[m.code][t],l=SVOL[m.code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}}));return v?a/v:0;}
-function sOrgSeries(f,win){const o=[];for(let e=win-1;e<90;e++)o.push(+sOrg(f,win,e).toFixed(1));return o;}
-function sPool(win){let a=0,v=0;SMKT.forEach(m=>TYPES.forEach(t=>{const p=SDATA[m.code][t],l=SVOL[m.code][t];for(let i=90-win;i<90;i++){a+=p[i]*l[i];v+=l[i];}}));return{amt:a,lit:v};}
+function sRoll(code,f,win,end){const ts=typesOf(f);const e=end==null?N-1:end;let a=0,v=0;ts.forEach(t=>{const p=SDATA[code][t],l=SVOL[code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}});return v?a/v:0;}
+function sSeries(code,f,win){const o=[];for(let e=win-1;e<N;e++)o.push(+sRoll(code,f,win,e).toFixed(1));return o;}
+function sOrg(f,win,end){const ts=typesOf(f);const e=end==null?N-1:end;let a=0,v=0;SMKT.forEach(m=>ts.forEach(t=>{const p=SDATA[m.code][t],l=SVOL[m.code][t];for(let i=Math.max(0,e-win+1);i<=e;i++){a+=p[i]*l[i];v+=l[i];}}));return v?a/v:0;}
+function sOrgSeries(f,win){const o=[];for(let e=win-1;e<N;e++)o.push(+sOrg(f,win,e).toFixed(1));return o;}
+function sPool(win){let a=0,v=0;SMKT.forEach(m=>TYPES.forEach(t=>{const p=SDATA[m.code][t],l=SVOL[m.code][t];for(let i=N-win;i<N;i++){a+=p[i]*l[i];v+=l[i];}}));return{amt:a,lit:v};}
 
 // ============ maps ============
 function heat(t){t=Math.max(0,Math.min(1,t));const st=[[0,[76,183,130]],[0.5,[242,201,76]],[1,[235,87,87]]];let a=st[0],b=st[2];for(let i=0;i<st.length-1;i++){if(t>=st[i][0]&&t<=st[i+1][0]){a=st[i];b=st[i+1];break;}}const f=(t-a[0])/((b[0]-a[0])||1);const c=a[1].map((v,i)=>Math.round(v+(b[1][i]-v)*f));return `rgb(${c[0]},${c[1]},${c[2]})`;}
@@ -464,7 +465,7 @@ function drawSellMap(rows){if(!sellLayer)return;sellLayer.clearLayers();const ms
    .bindTooltip(`<b>${r.name}</b><br><span class="sm">sell Rs ${r.sell.toFixed(0)} · logi Rs ${r.logi} · delivered Rs ${r.delivered.toFixed(0)}</span><br>Margin Rs ${r.mar.toFixed(1)}/L (${r.pct.toFixed(1)}%)`,{className:'mtip',direction:'top',opacity:1}).addTo(sellLayer);});}
 
 // ============ state + nav ============
-let FLT='All', CURTAB='buy';
+let FLT='All', CURTAB='buy', TF=90;
 let SEL={c:"BHW",d:30};
 let BKSEL={own:'BHW',centers:{BHW:true,MHB:true,UBH:true,TRS:true}};
 let SSEL={own:'LHR',markets:{LHR:true,FSD:true,SGD:true,ISB:true,MUL:true,GUJ:true}};
@@ -497,12 +498,13 @@ function selCenter(code){SEL.c=code;const s=document.getElementById('bkCenter');
 function renderDeskCenters(){document.getElementById('deskCenters').innerHTML=CENTERS.map(c=>{const on=BKSEL.centers[c.code];
   return `<button style="padding:5px 10px;border-radius:7px;border:1px solid ${on?CCOL[c.code]:'var(--line)'};background:${on?'transparent':'var(--panel2)'};color:${on?CCOL[c.code]:'var(--mut)'};font-weight:500;font-size:12px;cursor:pointer" onclick="toggleDeskCenter('${c.code}')">${on?'●':'○'} ${c.name}</button>`;}).join('');}
 function toggleDeskCenter(code){BKSEL.centers[code]=!BKSEL.centers[code];renderDeskCenters();drawDeskChart();}
+function tfLabels(n){const out=[],now=new Date();for(let i=n-1;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);out.push(d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}));}return out;}
 let deskCh;
-function drawDeskChart(){const codes=CENTERS.filter(c=>BKSEL.centers[c.code]);const labels=Array.from({length:61},(_,i)=>i);
- const ds=[{label:'Company avg',data:bOrgSeries(FLT,30),borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.25,pointRadius:0,borderWidth:3}];
- codes.forEach(c=>ds.push({label:c.name,data:bSeries(c.code,FLT,30),borderColor:CCOL[c.code],backgroundColor:'transparent',fill:false,tension:.25,pointRadius:0,borderWidth:1.5}));
+function drawDeskChart(){const codes=CENTERS.filter(c=>BKSEL.centers[c.code]);const comp=bOrgSeries(FLT,30).slice(-TF);const labels=tfLabels(comp.length);
+ const ds=[{label:'Company avg',data:comp,borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:3}];
+ codes.forEach(c=>ds.push({label:c.name,data:bSeries(c.code,FLT,30).slice(-TF),borderColor:CCOL[c.code],backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:1.5}));
  const ctx=document.getElementById('deskChart');if(deskCh)deskCh.destroy();
- deskCh=new Chart(ctx,{type:'line',data:{labels,datasets:ds},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:()=>'',label:x=>x.dataset.label+': Rs '+x.raw}}},scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},interaction:{intersect:false}}});}
+ deskCh=new Chart(ctx,{type:'line',data:{labels,datasets:ds},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:i=>i[0].label,label:x=>x.dataset.label+': Rs '+(+x.raw).toFixed(1)}}},scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},interaction:{mode:'index',intersect:false}}});}
 function renderDeskTable(){const sell=sOrg(FLT,30);
  const rows=CENTERS.map(c=>{const r30=bRoll(c.code,FLT,30),r14=bRoll(c.code,FLT,14),r7=bRoll(c.code,FLT,7);return {code:c.code,name:c.name,r7,r14,r30,mar:sell-r30};}).sort((a,b)=>a.r30-b.r30);
  document.getElementById('deskTable').innerHTML=rows.map((r,i)=>`<tr${r.code===BKSEL.own?' style="background:rgba(94,106,210,.14)"':''}><td>${i+1}</td><td><span style="color:${CCOL[r.code]}">●</span> ${r.name}${i===0?' <span class="badge">BEST</span>':''}</td><td class="mono">${money1(r.r7)}</td><td class="mono">${money1(r.r14)}</td><td class="mono"><b>${money1(r.r30)}</b></td><td class="mono ${r.mar>=0?'up':'down'}">${money1(r.mar)}</td><td style="width:80px"><div class="bar"><span style="width:${Math.min(100,Math.max(4,(r.r30-175)/(225-175)*100))}%;background:${CCOL[r.code]}"></span></div></td></tr>`).join('');}
@@ -563,11 +565,11 @@ function renderSellCenters(){document.getElementById('sellCenters').innerHTML=SM
   return `<button style="padding:5px 10px;border-radius:7px;border:1px solid ${on?SCOL[m.code]:'var(--line)'};background:${on?'transparent':'var(--panel2)'};color:${on?SCOL[m.code]:'var(--mut)'};font-weight:500;font-size:12px;cursor:pointer" onclick="toggleSellMarket('${m.code}')">${on?'●':'○'} ${m.name}</button>`;}).join('');}
 function toggleSellMarket(code){SSEL.markets[code]=!SSEL.markets[code];renderSellCenters();drawSellChart();}
 let sellCh;
-function drawSellChart(){const codes=SMKT.filter(m=>SSEL.markets[m.code]);const labels=Array.from({length:61},(_,i)=>i);
- const ds=[{label:'Company avg',data:sOrgSeries(FLT,30),borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.25,pointRadius:0,borderWidth:3}];
- codes.forEach(m=>ds.push({label:m.name,data:sSeries(m.code,FLT,30),borderColor:SCOL[m.code],backgroundColor:'transparent',fill:false,tension:.25,pointRadius:0,borderWidth:1.5}));
+function drawSellChart(){const codes=SMKT.filter(m=>SSEL.markets[m.code]);const comp=sOrgSeries(FLT,30).slice(-TF);const labels=tfLabels(comp.length);
+ const ds=[{label:'Company avg',data:comp,borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:3}];
+ codes.forEach(m=>ds.push({label:m.name,data:sSeries(m.code,FLT,30).slice(-TF),borderColor:SCOL[m.code],backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:1.5}));
  const ctx=document.getElementById('sellChart');if(sellCh)sellCh.destroy();
- sellCh=new Chart(ctx,{type:'line',data:{labels,datasets:ds},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:()=>'',label:x=>x.dataset.label+': Rs '+x.raw}}},scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},interaction:{intersect:false}}});}
+ sellCh=new Chart(ctx,{type:'line',data:{labels,datasets:ds},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:i=>i[0].label,label:x=>x.dataset.label+': Rs '+(+x.raw).toFixed(1)}}},scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},interaction:{mode:'index',intersect:false}}});}
 function renderSellTable(){const buy=bOrg(FLT,30);
  const rows=SMKT.map(m=>{const r30=sRoll(m.code,FLT,30),r14=sRoll(m.code,FLT,14),r7=sRoll(m.code,FLT,7);return {code:m.code,name:m.name,r7,r14,r30,mar:r30-buy};}).sort((a,b)=>b.r30-a.r30);const mx=Math.max(...rows.map(r=>r.r30)),mn=Math.min(...rows.map(r=>r.r30));
  document.getElementById('sellTable').innerHTML=rows.map((r,i)=>`<tr${r.code===SSEL.own?' style="background:rgba(94,106,210,.14)"':''}><td>${i+1}</td><td><span style="color:${SCOL[r.code]}">●</span> ${r.name}${i===0?' <span class="badge">BEST</span>':''}</td><td class="mono">${money1(r.r7)}</td><td class="mono">${money1(r.r14)}</td><td class="mono"><b>${money1(r.r30)}</b></td><td class="mono ${r.mar>=0?'up':'down'}">${money1(r.mar)}</td><td style="width:80px"><div class="bar"><span style="width:${Math.min(100,Math.max(4,(r.r30-mn)/((mx-mn)||1)*100))}%;background:${SCOL[r.code]}"></span></div></td></tr>`).join('');}
@@ -672,12 +674,15 @@ document.getElementById('nav').addEventListener('click',e=>{const b=e.target.clo
 document.getElementById('fltBuy').addEventListener('click',e=>{if(e.target.dataset.f)setFlt(e.target.dataset.f);});
 document.getElementById('fltSell').addEventListener('click',e=>{if(e.target.dataset.f)setFlt(e.target.dataset.f);});
 document.getElementById('tf').addEventListener('click',e=>{if(!e.target.dataset.d)return;SEL.d=+e.target.dataset.d;document.querySelectorAll('#tf button').forEach(b=>b.classList.toggle('on',b===e.target));renderChart();});
+function setTF(v){TF=v;document.querySelectorAll('#tfBuy button,#tfSell button').forEach(b=>b.classList.toggle('on',+b.dataset.t===v));if(CURTAB==='buy')drawDeskChart();else if(CURTAB==='sell')drawSellChart();}
+document.getElementById('tfBuy').addEventListener('click',e=>{if(e.target.dataset.t)setTF(+e.target.dataset.t);});
+document.getElementById('tfSell').addEventListener('click',e=>{if(e.target.dataset.t)setTF(+e.target.dataset.t);});
 
 
 // ============ LIVE DATA (data.json from puller) ============
 const LIVECOORD={'LOC-000532':[31.449,72.223],'LOC-000784':[31.480,72.653],'LOC-000503':[31.644,72.636],'LOC-000526':[31.608,72.592],'LOC-000356':[31.72,73.10],'LOC-000816':[31.95,72.90]};
 function fixxy(code,lat,lng){if(LIVECOORD[code])return LIVECOORD[code];if(!lat||!lng||Math.abs(lat-30.3728)<0.02)return[31.6,72.6];return[lat,lng];}
-function flat(v){v=+v||0;return Array.from({length:90},()=>+v.toFixed(1));}
+function flat(v){v=+v||0;return Array.from({length:N},()=>+v.toFixed(1));}
 function applyLive(d){
  const PAL=['#5E6AD2','#4CB782','#E2B340','#EB5757','#B08CFF','#F2994A','#56CCF2','#8A8F98'];CCOL={};SCOL={};
  CENTERS=d.buy.centres.map((c,i)=>{const xy=fixxy(c.code,c.lat,c.lng);const base={};let vd=0;
