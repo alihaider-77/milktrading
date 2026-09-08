@@ -509,12 +509,13 @@ function heroVol(D,codes,days){if(!D)return 0;const bc=D.byCentre||D.byMarket||{
 function smooth(a,w){if(w<=1)return a.slice();const o=[];for(let i=0;i<a.length;i++){let s=0,n=0;for(let j=Math.max(0,i-w+1);j<=i;j++){if(a[j]!=null){s+=a[j];n++;}}o.push(n?+(s/n).toFixed(1):null);}return o;}
 function tfLabels(n){const out=[],now=new Date();for(let i=n-1;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);out.push(d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}));}return out;}
 let deskCh;
-function drawDeskChart(){const codes=CENTERS.filter(c=>BKSEL.centers[c.code]).map(c=>c.code);let labels,price,vol;let tVol=0,tAmt=0;
+function drawDeskChart(){const sel=CENTERS.filter(c=>BKSEL.centers[c.code]);const codes=sel.map(c=>c.code);let labels,price,vol;let tVol=0,tAmt=0;
  if(LIVEBUYS){const A=aggDaily(LIVEBUYS,codes,TF);labels=A.labels;price=A.price;vol=A.vol;const bc=LIVEBUYS.byCentre,n=LIVEBUYS.dates.length,st=Math.max(0,n-TF);for(let i=st;i<n;i++)codes.forEach(c=>{const o=bc[c];if(o){tVol+=o.vol[i]||0;tAmt+=o.amt[i]||0;}});}
  else{price=bOrgSeries(FLT,TF);labels=tfLabels(price.length);vol=null;}
  const tot=document.getElementById('deskTotal');if(tot)tot.innerHTML=vol?`<span class="big mono" style="font-size:22px">${Math.round(tVol).toLocaleString()} L</span> <span class="note">procured · Rs ${Math.round(tAmt).toLocaleString()} spent · last ${TF}d</span>`:'';
- const dsets=[];if(vol)dsets.push({type:'bar',label:'Daily volume (L)',data:vol,yAxisID:'v',backgroundColor:'rgba(94,106,210,.30)',borderWidth:0,order:2});
- dsets.push({type:'line',label:'Daily price /L',data:price,yAxisID:'p',borderColor:'#F7F8F8',borderWidth:2,pointRadius:0,tension:.15,spanGaps:true,order:1});
+ const dsets=[];if(vol)dsets.push({type:'bar',label:'Volume (L)',data:vol,yAxisID:'v',backgroundColor:'rgba(94,106,210,.20)',borderWidth:0,order:5});
+ dsets.push({type:'line',label:'Company /L',data:price,yAxisID:'p',borderColor:'#F7F8F8',borderWidth:2.5,pointRadius:0,tension:.15,spanGaps:true,order:1});
+ if(LIVEBUYS)sel.forEach(c=>{const a=aggDaily(LIVEBUYS,[c.code],TF);dsets.push({type:'line',label:c.name,data:a.price,yAxisID:'p',borderColor:CCOL[c.code],borderWidth:1.3,pointRadius:0,tension:.15,spanGaps:true,order:2});});
  const ctx=document.getElementById('deskChart');if(deskCh)deskCh.destroy();
  deskCh=new Chart(ctx,{type:'bar',data:{labels,datasets:dsets},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:i=>i[0].label,label:x=>x.dataset.label+': '+(x.dataset.yAxisID==='v'?Math.round(x.raw).toLocaleString()+' L':'Rs '+(+x.raw).toFixed(1))}}},scales:{x:{display:false},p:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}},v:{position:'left',grid:{display:false},ticks:{color:'#7C8B9A',callback:v=>v>=1000?Math.round(v/1000)+'k':v}}},interaction:{mode:'index',intersect:false}}});}
 function renderDeskTable(){const sell=sOrg(FLT,30);
@@ -577,12 +578,13 @@ function renderSellCenters(){document.getElementById('sellCenters').innerHTML=SM
   return `<button style="padding:5px 10px;border-radius:7px;border:1px solid ${on?SCOL[m.code]:'var(--line)'};background:${on?'transparent':'var(--panel2)'};color:${on?SCOL[m.code]:'var(--mut)'};font-weight:500;font-size:12px;cursor:pointer" onclick="toggleSellMarket('${m.code}')">${on?'●':'○'} ${m.name}</button>`;}).join('');}
 function toggleSellMarket(code){SSEL.markets[code]=!SSEL.markets[code];renderSellCenters();drawSellChart();}
 let sellCh;
-function drawSellChart(){const codes=SMKT.filter(m=>SSEL.markets[m.code]).map(m=>m.code);let labels,price,vol;let tVol=0,tAmt=0;
+function drawSellChart(){const sel=SMKT.filter(m=>SSEL.markets[m.code]);const codes=sel.map(m=>m.code);let labels,price,vol;let tVol=0,tAmt=0;
  if(LIVESELLS){const A=aggDaily(LIVESELLS,codes,TF);labels=A.labels;price=A.price;vol=A.vol;const bc=LIVESELLS.byMarket,n=LIVESELLS.dates.length,st=Math.max(0,n-TF);for(let i=st;i<n;i++)codes.forEach(c=>{const o=bc[c];if(o){tVol+=o.vol[i]||0;tAmt+=o.amt[i]||0;}});}
  else{price=sOrgSeries(FLT,TF);labels=tfLabels(price.length);vol=null;}
  const tot=document.getElementById('sellTotal');if(tot)tot.innerHTML=vol?`<span class="big mono" style="font-size:22px">${Math.round(tVol).toLocaleString()} L</span> <span class="note">sold · Rs ${Math.round(tAmt).toLocaleString()} revenue · last ${TF}d</span>`:'';
- const dsets=[];if(vol)dsets.push({type:'bar',label:'Daily volume (L)',data:vol,yAxisID:'v',backgroundColor:'rgba(94,106,210,.30)',borderWidth:0,order:2});
- dsets.push({type:'line',label:'Daily price /L',data:price,yAxisID:'p',borderColor:'#F7F8F8',borderWidth:2,pointRadius:0,tension:.15,spanGaps:true,order:1});
+ const dsets=[];if(vol)dsets.push({type:'bar',label:'Volume (L)',data:vol,yAxisID:'v',backgroundColor:'rgba(94,106,210,.20)',borderWidth:0,order:5});
+ dsets.push({type:'line',label:'Company /L',data:price,yAxisID:'p',borderColor:'#F7F8F8',borderWidth:2.5,pointRadius:0,tension:.15,spanGaps:true,order:1});
+ if(LIVESELLS)sel.forEach(m=>{const a=aggDaily(LIVESELLS,[m.code],TF);dsets.push({type:'line',label:m.name,data:a.price,yAxisID:'p',borderColor:SCOL[m.code],borderWidth:1.3,pointRadius:0,tension:.15,spanGaps:true,order:2});});
  const ctx=document.getElementById('sellChart');if(sellCh)sellCh.destroy();
  sellCh=new Chart(ctx,{type:'bar',data:{labels,datasets:dsets},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:i=>i[0].label,label:x=>x.dataset.label+': '+(x.dataset.yAxisID==='v'?Math.round(x.raw).toLocaleString()+' L':'Rs '+(+x.raw).toFixed(1))}}},scales:{x:{display:false},p:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}},v:{position:'left',grid:{display:false},ticks:{color:'#7C8B9A',callback:v=>v>=1000?Math.round(v/1000)+'k':v}}},interaction:{mode:'index',intersect:false}}});}
 function renderSellTable(){const buy=bOrg(FLT,30);
