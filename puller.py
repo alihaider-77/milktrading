@@ -109,26 +109,22 @@ def main():
             ce["opexVarPerL"] = round(var / lit, 2)
             ce["opexFixedPerL"] = round(fixed / lit, 2)
 
-    # ---------- BUY weekly series (true paid price, through today) ----------
-    cur.execute("SELECT p.collection_center cc, YEARWEEK(d.creation,3) wk, "
-                "SUM(d.total_payable_amount) pay, SUM(d.milk_volume) vol "
+    # ---------- BUY daily series (raw daily price + volume, per centre) ----------
+    cur.execute("SELECT p.collection_center cc, DATE(d.creation) dt, "
+                "SUM(d.total_payable_amount) amt, SUM(d.milk_volume) vol "
                 "FROM " + MSD + " WHERE d.docstatus<2 AND d.milk_volume>0 "
-                "AND d.creation>=DATE_SUB(NOW(),INTERVAL 210 DAY) GROUP BY p.collection_center, wk")
-    brows = cur.fetchall()
-    bweeks = sorted({r["wk"] for r in brows})[-26:]
-    bC, bV, bN, bD = {}, {}, {w: 0.0 for w in bweeks}, {w: 0.0 for w in bweeks}
-    for r in brows:
-        if r["wk"] not in bweeks or not r["cc"] or not r["vol"]:
+                "AND d.creation>=DATE_SUB(NOW(),INTERVAL 180 DAY) GROUP BY p.collection_center, dt")
+    braw = cur.fetchall()
+    ccset = {ce["code"] for ce in centres}
+    bdates = sorted({str(r["dt"]) for r in braw if r["cc"] in ccset})
+    bi = {d: i for i, d in enumerate(bdates)}
+    bAmt = {cc: [0.0]*len(bdates) for cc in ccset}; bVol = {cc: [0.0]*len(bdates) for cc in ccset}
+    for r in braw:
+        if r["cc"] not in ccset:
             continue
-        v = float(r["vol"]); pay = float(r["pay"] or 0)
-        bC.setdefault(r["cc"], {})[r["wk"]] = round(pay / v, 1)
-        bV.setdefault(r["cc"], {})[r["wk"]] = round(v)
-        bN[r["wk"]] += pay; bD[r["wk"]] += v
-    buy_series = {"weeks": [wk_label(w) for w in bweeks],
-                  "company": [round(bN[w] / bD[w], 1) if bD[w] else None for w in bweeks],
-                  "vol": [round(bD[w]) for w in bweeks],
-                  "byCentre": {cc: [bC.get(cc, {}).get(w) for w in bweeks] for cc in bC},
-                  "byCentreVol": {cc: [bV.get(cc, {}).get(w) for w in bweeks] for cc in bV}}
+        i = bi[str(r["dt"])]; bAmt[r["cc"]][i] += float(r["amt"] or 0); bVol[r["cc"]][i] += float(r["vol"] or 0)
+    buy_daily = {"dates": [__import__("datetime").date.fromisoformat(d).strftime("%d %b") for d in bdates],
+                 "byCentre": {cc: {"amt": [round(x) for x in bAmt[cc]], "vol": [round(x) for x in bVol[cc]]} for cc in ccset}}
 
     # ---------- SELLING: Milk Sale (last 30d levels) ----------
     cur.execute("""SELECT location, milk_type, SUM(price_per_liter*milk_volume_liters)/SUM(milk_volume_liters) p,
@@ -146,23 +142,21 @@ def main():
         m["types"][norm_type(r["milk_type"])] = {"price": round(float(r["p"]), 1), "vol": round(float(r["v"]) / 30.0)}
     markets = list(markets.values())
 
-    cur.execute("""SELECT location loc, YEARWEEK(creation,3) wk,
-                     SUM(price_per_liter*milk_volume_liters)/SUM(milk_volume_liters) p, SUM(milk_volume_liters) v
-                   FROM `tabMilk Sale` WHERE docstatus<2 AND creation>=DATE_SUB(NOW(),INTERVAL 210 DAY) GROUP BY loc, wk""")
-    srows = cur.fetchall()
-    sweeks = sorted({r["wk"] for r in srows})[-26:]
-    sC, sV, sN, sD = {}, {}, {w: 0.0 for w in sweeks}, {w: 0.0 for w in sweeks}
-    for r in srows:
-        if r["wk"] not in sweeks:
+    # ---------- SELL daily series ----------
+    cur.execute("""SELECT location loc, DATE(creation) dt,
+                     SUM(price_per_liter*milk_volume_liters) amt, SUM(milk_volume_liters) vol
+                   FROM `tabMilk Sale` WHERE docstatus<2 AND creation>=DATE_SUB(NOW(),INTERVAL 180 DAY) GROUP BY loc, dt""")
+    sraw = cur.fetchall()
+    mset = {m["code"] for m in markets}
+    sdates = sorted({str(r["dt"]) for r in sraw if r["loc"] in mset})
+    si = {d: i for i, d in enumerate(sdates)}
+    sAmt = {c: [0.0]*len(sdates) for c in mset}; sVol = {c: [0.0]*len(sdates) for c in mset}
+    for r in sraw:
+        if r["loc"] not in mset:
             continue
-        sC.setdefault(r["loc"], {})[r["wk"]] = round(float(r["p"]), 1)
-        sV.setdefault(r["loc"], {})[r["wk"]] = round(float(r["v"]))
-        sN[r["wk"]] += float(r["p"]) * float(r["v"]); sD[r["wk"]] += float(r["v"])
-    sell_series = {"weeks": [wk_label(w) for w in sweeks],
-                   "company": [round(sN[w] / sD[w], 1) if sD[w] else None for w in sweeks],
-                   "vol": [round(sD[w]) for w in sweeks],
-                   "byMarket": {loc_: [sC.get(loc_, {}).get(w) for w in sweeks] for loc_ in sC},
-                   "byMarketVol": {loc_: [sV.get(loc_, {}).get(w) for w in sweeks] for loc_ in sV}}
+        i = si[str(r["dt"])]; sAmt[r["loc"]][i] += float(r["amt"] or 0); sVol[r["loc"]][i] += float(r["vol"] or 0)
+    sell_daily = {"dates": [__import__("datetime").date.fromisoformat(d).strftime("%d %b") for d in sdates],
+                  "byMarket": {c: {"amt": [round(x) for x in sAmt[c]], "vol": [round(x) for x in sVol[c]]} for c in mset}}
 
     def company30(entities):
         num = den = 0.0
@@ -174,8 +168,8 @@ def main():
     data = {
         "asOf": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
         "source": "Frappe Cloud replica — Milk Supplier Deposit (buy, actual paid) + Milk Sale (sell)",
-        "buy": {"centres": centres, "company30": company30(centres), "series": buy_series},
-        "sell": {"markets": markets, "company30": company30(markets), "series": sell_series},
+        "buy": {"centres": centres, "company30": company30(centres), "daily": buy_daily},
+        "sell": {"markets": markets, "company30": company30(markets), "daily": sell_daily},
         "notes": {
             "buying": "Actual paid price/L = SUM(total_payable_amount)/SUM(milk_volume) from Milk Supplier Deposit (child of Milk Collections) — the live intake table, current to today. Dispatch/Receive were retired ~20 Jul 2026. Weekly series is the true paid price.",
             "market_competitor": "Not in ERP — agent-posted; left to the app.",
