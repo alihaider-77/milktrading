@@ -166,11 +166,54 @@ def main():
                    FROM `tabMilk Sale` WHERE docstatus<2 AND creation>=DATE_SUB(NOW(),INTERVAL 30 DAY)""")
     sell30 = cur.fetchone()["p"]
 
+    # --- WEEKLY TIME SERIES (real movement) ---
+    def wk_label(yw):
+        y, w = int(str(yw)[:4]), int(str(yw)[4:])
+        return datetime.date.fromisocalendar(y, w, 1).strftime("%d %b")
+
+    # BUY: weekly volume-weighted TS per centre -> effective price = centre base x TS/13
+    base_c = {ce["code"]: (sum(t["base"] for t in ce["types"].values()) / len(ce["types"]) if ce["types"] else 150.0) for ce in centres}
+    cur.execute("""SELECT collection_centre cc, YEARWEEK(creation,3) wk,
+                     SUM(weighted_average_of_ts*gross_volume)/SUM(gross_volume) ts, SUM(gross_volume) vol
+                   FROM `tabMilk Dispatch` WHERE docstatus<2 AND collection_centre LIKE 'LOC-%%'
+                     AND weighted_average_of_ts BETWEEN 8 AND 18 AND creation>=DATE_SUB(NOW(),INTERVAL 210 DAY)
+                   GROUP BY cc, wk""")
+    brows = cur.fetchall()
+    bweeks = sorted({r["wk"] for r in brows})[-26:]
+    bC, bN, bD = {}, {w: 0.0 for w in bweeks}, {w: 0.0 for w in bweeks}
+    for r in brows:
+        if r["wk"] not in bweeks or not r["ts"]:
+            continue
+        pr = base_c.get(r["cc"], 150.0) * float(r["ts"]) / 13.0
+        v = float(r["vol"] or 0)
+        bC.setdefault(r["cc"], {})[r["wk"]] = round(pr, 1)
+        bN[r["wk"]] += pr * v; bD[r["wk"]] += v
+    buy_series = {"weeks": [wk_label(w) for w in bweeks],
+                  "company": [round(bN[w] / bD[w], 1) if bD[w] else None for w in bweeks],
+                  "byCentre": {cc: [bC.get(cc, {}).get(w) for w in bweeks] for cc in bC}}
+
+    # SELL: weekly volume-weighted price per market from Milk Sale
+    cur.execute("""SELECT location loc, YEARWEEK(creation,3) wk,
+                     SUM(price_per_liter*milk_volume_liters)/SUM(milk_volume_liters) p, SUM(milk_volume_liters) v
+                   FROM `tabMilk Sale` WHERE docstatus<2 AND creation>=DATE_SUB(NOW(),INTERVAL 210 DAY)
+                   GROUP BY loc, wk""")
+    srows = cur.fetchall()
+    sweeks = sorted({r["wk"] for r in srows})[-26:]
+    sC, sN, sD = {}, {w: 0.0 for w in sweeks}, {w: 0.0 for w in sweeks}
+    for r in srows:
+        if r["wk"] not in sweeks:
+            continue
+        sC.setdefault(r["loc"], {})[r["wk"]] = round(float(r["p"]), 1)
+        sN[r["wk"]] += float(r["p"]) * float(r["v"]); sD[r["wk"]] += float(r["v"])
+    sell_series = {"weeks": [wk_label(w) for w in sweeks],
+                   "company": [round(sN[w] / sD[w], 1) if sD[w] else None for w in sweeks],
+                   "byMarket": {loc: [sC.get(loc, {}).get(w) for w in sweeks] for loc in sC}}
+
     data = {
         "asOf": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
         "source": "Frappe Cloud replica — Milk Pricing/Dispatch (buy) + Milk Sale (sell)",
-        "buy": {"centres": centres, "company30": company(30, centres)},
-        "sell": {"markets": markets, "company30": round(float(sell30), 2) if sell30 else None},
+        "buy": {"centres": centres, "company30": company(30, centres), "series": buy_series},
+        "sell": {"markets": markets, "company30": round(float(sell30), 2) if sell30 else None, "series": sell_series},
         "notes": {
             "buying": "Effective rate = Milk Pricing base_price x (avg TS / 13), per centre x type, using clean TS from Milk Dispatch (last 120d); volume-weighted by dispatch litres. Varies by quality (Buffalo>Cow). Still no day-by-day history, so the rolling line reflects current quality/mix, not a negotiated-price time series.",
             "market_competitor": "Not in ERP — agent-posted; left to the app.",

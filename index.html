@@ -140,14 +140,14 @@ label{font-size:11px;color:var(--mut);font-weight:500;display:block;margin-botto
       </div>
       <div class="row" style="justify-content:space-between;margin-top:14px">
         <div class="row" style="gap:8px"><span class="note">Break down by</span><div class="seg" id="fltBuy"><button data-f="All" class="on">All milk</button><button data-f="Buffalo">Buffalo</button><button data-f="Cow">Cow</button><button data-f="Mix">Mix</button></div></div>
-        <div class="note">Raw ERP pickup price · volume-weighted</div>
+        <div class="row" style="gap:6px"><span class="note">Buying for</span><input id="hznBuy" class="mono" value="30" style="width:56px;padding:6px 8px" oninput="setHZN(this.value)"><span class="note">days · vol-weighted</span></div>
       </div>
       <div class="ticker" id="bTicker" style="margin-top:12px"></div>
       <div class="kpi" id="deskKpi" style="margin-top:12px"></div>
 
       <div class="grid two" style="margin-top:12px">
         <div class="card">
-          <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div><h3>30-day rolling buying price — company &amp; by centre</h3><div class="note">Company average (thick) vs each centre. Lower is better.</div></div><div class="seg" id="tfBuy"><button data-t="7">7D</button><button data-t="14">14D</button><button data-t="30">30D</button><button data-t="90" class="on">3M</button><button data-t="180">6M</button><button data-t="365">12M</button></div></div>
+          <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div><h3>30-day rolling buying price — company &amp; by centre</h3><div class="note">Company average (thick) vs each centre. Lower is better.</div></div><div class="seg" id="tfBuy"><button data-t="7">7D</button><button data-t="14">14D</button><button data-t="30" class="on">30D</button><button data-t="90">3M</button><button data-t="180">6M</button><button data-t="365">12M</button></div></div>
           <canvas id="deskChart" height="150" style="margin-top:8px"></canvas>
           <div class="row" id="deskCenters" style="gap:6px;margin-top:10px"></div>
         </div>
@@ -157,7 +157,8 @@ label{font-size:11px;color:var(--mut);font-weight:500;display:block;margin-botto
           <div class="row" style="gap:8px;margin-top:10px">
             <div style="flex:1.4"><label>Centre</label><select id="bkCenter" onchange="calcBuy()"></select></div>
             <div style="flex:1"><label>Raw price (Rs/L)</label><input id="bkPrice" class="mono" value="200" oninput="calcBuy()"></div>
-            <div style="flex:1"><label>Volume (L)</label><input id="bkVol" class="mono" value="8000" oninput="calcBuy()"></div>
+            <div style="flex:1"><label>Volume (L/day)</label><input id="bkVol" class="mono" value="500" oninput="calcBuy()"></div>
+            <div style="flex:0.7"><label>Days</label><input id="bkDays" class="mono" value="30" oninput="calcBuy()"></div>
           </div>
           <div class="row" style="gap:16px;margin-top:10px">
             <label class="chk"><input type="checkbox" id="bkOpex" onchange="calcBuy()"> + OpEx (centre)</label>
@@ -207,14 +208,14 @@ label{font-size:11px;color:var(--mut);font-weight:500;display:block;margin-botto
       </div>
       <div class="row" style="justify-content:space-between;margin-top:14px">
         <div class="row" style="gap:8px"><span class="note">Break down by</span><div class="seg" id="fltSell"><button data-f="All" class="on">All milk</button><button data-f="Buffalo">Buffalo</button><button data-f="Cow">Cow</button><button data-f="Mix">Mix</button></div></div>
-        <div class="note">Where we sell &amp; at what price · volume-weighted</div>
+        <div class="row" style="gap:6px"><span class="note">Selling for</span><input id="hznSell" class="mono" value="30" style="width:56px;padding:6px 8px" oninput="setHZN(this.value)"><span class="note">days · vol-weighted</span></div>
       </div>
       <div class="ticker" id="sTicker" style="margin-top:12px"></div>
       <div class="kpi" id="sellKpi" style="margin-top:12px"></div>
 
       <div class="grid two" style="margin-top:12px">
         <div class="card">
-          <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div><h3>30-day rolling selling price — company &amp; by market</h3><div class="note">Company average (thick) vs each market. Higher is better.</div></div><div class="seg" id="tfSell"><button data-t="7">7D</button><button data-t="14">14D</button><button data-t="30">30D</button><button data-t="90" class="on">3M</button><button data-t="180">6M</button><button data-t="365">12M</button></div></div>
+          <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px"><div><h3>30-day rolling selling price — company &amp; by market</h3><div class="note">Company average (thick) vs each market. Higher is better.</div></div><div class="seg" id="tfSell"><button data-t="7">7D</button><button data-t="14">14D</button><button data-t="30" class="on">30D</button><button data-t="90">3M</button><button data-t="180">6M</button><button data-t="365">12M</button></div></div>
           <canvas id="sellChart" height="150" style="margin-top:8px"></canvas>
           <div class="row" id="sellCenters" style="gap:6px;margin-top:10px"></div>
         </div>
@@ -224,7 +225,8 @@ label{font-size:11px;color:var(--mut);font-weight:500;display:block;margin-botto
           <div class="row" style="gap:8px;margin-top:10px">
             <div style="flex:1.4"><label>Market</label><select id="skMarket" onchange="onMarketChange()"></select></div>
             <div style="flex:1"><label>Sale price (Rs/L)</label><input id="skPrice" class="mono" value="266" oninput="calcSell()"></div>
-            <div style="flex:1"><label>Volume (L)</label><input id="skVol" class="mono" value="6000" oninput="calcSell()"></div>
+            <div style="flex:1"><label>Volume (L/day)</label><input id="skVol" class="mono" value="500" oninput="calcSell()"></div>
+            <div style="flex:0.7"><label>Days</label><input id="skDays" class="mono" value="30" oninput="calcSell()"></div>
           </div>
           <div class="row" style="gap:16px;margin-top:10px">
             <label class="chk"><input type="checkbox" id="skOpex" onchange="calcSell()"> + OpEx (centre)</label>
@@ -465,7 +467,7 @@ function drawSellMap(rows){if(!sellLayer)return;sellLayer.clearLayers();const ms
    .bindTooltip(`<b>${r.name}</b><br><span class="sm">sell Rs ${r.sell.toFixed(0)} · logi Rs ${r.logi} · delivered Rs ${r.delivered.toFixed(0)}</span><br>Margin Rs ${r.mar.toFixed(1)}/L (${r.pct.toFixed(1)}%)`,{className:'mtip',direction:'top',opacity:1}).addTo(sellLayer);});}
 
 // ============ state + nav ============
-let FLT='All', CURTAB='buy', TF=90;
+let FLT='All', CURTAB='buy', TF=30, HZN=30, LIVEBUYS=null, LIVESELLS=null;
 let SEL={c:"BHW",d:30};
 let BKSEL={own:'BHW',centers:{BHW:true,MHB:true,UBH:true,TRS:true}};
 let SSEL={own:'LHR',markets:{LHR:true,FSD:true,SGD:true,ISB:true,MUL:true,GUJ:true}};
@@ -480,10 +482,10 @@ function setFlt(f){FLT=f;document.querySelectorAll('#fltBuy button,#fltSell butt
 
 // ============ BUYING DESK ============
 function renderBuy(){
- const r30=bOrg(FLT,30),r7=bOrg(FLT,7),r14=bOrg(FLT,14);
+ let r30,r7,r14;if(FLT==='All'&&LIVEBUYS&&LIVEBUYS.company){const cs=LIVEBUYS.company.filter(x=>x!=null),tl=k=>{const a=cs.slice(-k);return a.reduce((s,x)=>s+x,0)/(a.length||1);};r7=tl(1);r14=tl(2);r30=tl(4);}else{r30=bOrg(FLT,30);r7=bOrg(FLT,7);r14=bOrg(FLT,14);}
  document.getElementById('buyHero').textContent=money1(r30);
  const d7=r7-r30;const dir=d7<=0?'▼':'▲';
- document.getElementById('buyHeroMeta').innerHTML=`<span class="${d7<=0?'up':'down'}">${dir} Rs ${Math.abs(d7).toFixed(1)} 7-day vs 30-day</span> · company-wide, volume-weighted`;
+ {let dv=0;CENTERS.forEach(c=>TYPES.forEach(t=>{const a=VOL[c.code]&&VOL[c.code][t];if(a)dv+=a[a.length-1];}));const fv=dv*HZN;document.getElementById('buyHeroMeta').innerHTML=`<span class="${d7<=0?'up':'down'}">${dir} Rs ${Math.abs(d7).toFixed(1)} 7d vs 30d</span> · vol-weighted · <b>${HZN}-day plan</b> ≈ ${Math.round(fv).toLocaleString()} L / Rs ${Math.round(r30*fv).toLocaleString()}`;}
  renderDeskKpi(r7,r14,r30);renderBTicker();renderDeskCenters();drawDeskChart();calcBuy();renderDeskTable();renderSpread();renderChart();
  initBuyMap();setTimeout(()=>{if(buyMapObj){buyMapObj.invalidateSize();drawBuyMap();}},100);}
 function renderDeskKpi(r7,r14,r30){const sell=sOrg(FLT,30),mar=sell-r30,pct=sell?mar/sell*100:0;const d7=r7-r30,d14=r14-r30;const ar=d=>d<=0?'▼':'▲',cl=d=>d<=0?'up':'down';
@@ -498,11 +500,13 @@ function selCenter(code){SEL.c=code;const s=document.getElementById('bkCenter');
 function renderDeskCenters(){document.getElementById('deskCenters').innerHTML=CENTERS.map(c=>{const on=BKSEL.centers[c.code];
   return `<button style="padding:5px 10px;border-radius:7px;border:1px solid ${on?CCOL[c.code]:'var(--line)'};background:${on?'transparent':'var(--panel2)'};color:${on?CCOL[c.code]:'var(--mut)'};font-weight:500;font-size:12px;cursor:pointer" onclick="toggleDeskCenter('${c.code}')">${on?'●':'○'} ${c.name}</button>`;}).join('');}
 function toggleDeskCenter(code){BKSEL.centers[code]=!BKSEL.centers[code];renderDeskCenters();drawDeskChart();}
+function smooth(a,w){if(w<=1)return a.slice();const o=[];for(let i=0;i<a.length;i++){let s=0,n=0;for(let j=Math.max(0,i-w+1);j<=i;j++){if(a[j]!=null){s+=a[j];n++;}}o.push(n?+(s/n).toFixed(1):null);}return o;}
 function tfLabels(n){const out=[],now=new Date();for(let i=n-1;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);out.push(d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}));}return out;}
 let deskCh;
-function drawDeskChart(){const codes=CENTERS.filter(c=>BKSEL.centers[c.code]);const comp=bOrgSeries(FLT,30).slice(-TF);const labels=tfLabels(comp.length);
- const ds=[{label:'Company avg',data:comp,borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:3}];
- codes.forEach(c=>ds.push({label:c.name,data:bSeries(c.code,FLT,30).slice(-TF),borderColor:CCOL[c.code],backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:1.5}));
+function drawDeskChart(){const codes=CENTERS.filter(c=>BKSEL.centers[c.code]);let labels,comp,per;
+ if(LIVEBUYS){const w=Math.max(1,Math.round(TF/7));labels=LIVEBUYS.weeks;comp=smooth(LIVEBUYS.company,w);per=code=>smooth(LIVEBUYS.byCentre[code]||[],w);}else{comp=bOrgSeries(FLT,TF);labels=tfLabels(comp.length);per=code=>bSeries(code,FLT,TF);}
+ const ds=[{label:'Company avg',data:comp,borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:3,spanGaps:true}];
+ codes.forEach(c=>ds.push({label:c.name,data:per(c.code),borderColor:CCOL[c.code],backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:1.5,spanGaps:true}));
  const ctx=document.getElementById('deskChart');if(deskCh)deskCh.destroy();
  deskCh=new Chart(ctx,{type:'line',data:{labels,datasets:ds},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:i=>i[0].label,label:x=>x.dataset.label+': Rs '+(+x.raw).toFixed(1)}}},scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},interaction:{mode:'index',intersect:false}}});}
 function renderDeskTable(){const sell=sOrg(FLT,30);
@@ -526,7 +530,7 @@ function dealVerdict(cur,nw,side){const delta=nw-cur;const pct=cur?Math.abs(delt
  else{cls='ok';label='OK · MARGINAL';}
  return {cls,label,delta,pct,favorable,abs};}
 function calcBuy(){const code=document.getElementById('bkCenter').value;if(code)BKSEL.own=code;const c=CENTERS.find(x=>x.code===BKSEL.own);
- const raw=parseFloat(document.getElementById('bkPrice').value)||0,vol=parseFloat(document.getElementById('bkVol').value)||0;
+ const raw=parseFloat(document.getElementById('bkPrice').value)||0,lpd=parseFloat(document.getElementById('bkVol').value)||0,days=parseFloat(document.getElementById('bkDays').value)||30,vol=lpd*days;
  const useOpex=document.getElementById('bkOpex').checked,useLogi=document.getElementById('bkLogi').checked,logiVal=parseFloat(document.getElementById('bkLogiVal').value)||0;
  const pool=bPool(30);const cur=pool.lit?pool.amt/pool.lit:0;const nw=(pool.amt+raw*vol)/((pool.lit+vol)||1);
  let cost=raw;const lines=[`<div class="ln"><span>Raw price</span><b class="mono">${money1(raw)}</b></div>`];
@@ -539,16 +543,16 @@ function calcBuy(){const code=document.getElementById('bkCenter').value;if(code)
  const vd=dealVerdict(cur,nw,'buy');let reason='';if(raw>ADMIN.buyCeil){vd.cls='bad';vd.label='BAD DEAL';reason=' · above ceiling '+money1(ADMIN.buyCeil);}
  const arrow=nw<cur?'▼':(nw>cur?'▲':'▪'),word=nw<cur?'lowers':(nw>cur?'raises':'holds'),signed=(nw>=cur?'+':'−')+'Rs '+Math.abs(nw-cur).toFixed(2);
  const el=document.getElementById('bkVerdict');el.className='deal '+vd.cls;
- el.innerHTML=`<div class="dl">${vd.label}</div><div class="dm">${arrow} ${word} the 30-day avg to <b>${money1(nw)}</b> · ${signed} (${vd.pct.toFixed(2)}%)${reason}</div>`;
+ el.innerHTML=`<div class="dl">${vd.label}</div><div class="dm">${arrow} ${word} the 30-day avg to <b>${money1(nw)}</b> · ${signed} (${vd.pct.toFixed(2)}%)${reason}</div><div class="dm" style="opacity:.8">Break-even ceiling <b>${money1(cur)}/L</b> — pay below to pull the average down</div>`;
  const ranked=CENTERS.map(x=>({name:x.name,r:bRoll(x.code,'All',30)})).sort((a,b)=>a.r-b.r);const cheap=ranked[0];const myAvg=bRoll(BKSEL.own,'All',30);const vsMy=raw-myAvg;
- document.getElementById('bkSugg').innerHTML=`vs <b>${c.name}</b>'s 30d avg (${money1(myAvg)}) this lot is <b class="${vsMy<=0?'up':'down'}">${vsMy<=0?'▼':'▲'} Rs ${Math.abs(vsMy).toFixed(1)}</b>. Cheapest centre now: <b>${cheap.name} (${money1(cheap.r)})</b>.`+(raw>ADMIN.buyCeil?` <b class="down">Get the price under ${money1(ADMIN.buyCeil)}.</b>`:'');}
+ document.getElementById('bkSugg').innerHTML=`Deal ≈ <b>${lpd.toLocaleString()} L/day × ${days}d = ${vol.toLocaleString()} L</b>. Adds <b>${lpd.toLocaleString()} L/day</b> to ~${Math.round(pool.lit/30).toLocaleString()} L/day (+${(lpd/((pool.lit/30)||1)*100).toFixed(0)}% throughput).<br>vs <b>${c.name}</b>'s 30d avg (${money1(myAvg)}) this lot is <b class="${vsMy<=0?'up':'down'}">${vsMy<=0?'▼':'▲'} Rs ${Math.abs(vsMy).toFixed(1)}</b>. Cheapest centre now: <b>${cheap.name} (${money1(cheap.r)})</b>.`+(raw>ADMIN.buyCeil?` <b class="down">Get the price under ${money1(ADMIN.buyCeil)}.</b>`:'');}
 
 // ============ SALES DESK ============
 function renderSell(){
- const r30=sOrg(FLT,30),r7=sOrg(FLT,7),r14=sOrg(FLT,14);
+ let r30,r7,r14;if(FLT==='All'&&LIVESELLS&&LIVESELLS.company){const cs=LIVESELLS.company.filter(x=>x!=null),tl=k=>{const a=cs.slice(-k);return a.reduce((s,x)=>s+x,0)/(a.length||1);};r7=tl(1);r14=tl(2);r30=tl(4);}else{r30=sOrg(FLT,30);r7=sOrg(FLT,7);r14=sOrg(FLT,14);}
  document.getElementById('sellHero').textContent=money1(r30);
  const d7=r7-r30;const dir=d7>=0?'▲':'▼';
- document.getElementById('sellHeroMeta').innerHTML=`<span class="${d7>=0?'up':'down'}">${dir} Rs ${Math.abs(d7).toFixed(1)} 7-day vs 30-day</span> · company-wide, volume-weighted`;
+ {let dv=0;SMKT.forEach(m=>TYPES.forEach(t=>{const a=SVOL[m.code]&&SVOL[m.code][t];if(a)dv+=a[a.length-1];}));const fv=dv*HZN;document.getElementById('sellHeroMeta').innerHTML=`<span class="${d7>=0?'up':'down'}">${dir} Rs ${Math.abs(d7).toFixed(1)} 7d vs 30d</span> · vol-weighted · <b>${HZN}-day plan</b> ≈ ${Math.round(fv).toLocaleString()} L / Rs ${Math.round(r30*fv).toLocaleString()}`;}
  renderSellKpi(r7,r14,r30);renderSTicker();renderSellCenters();drawSellChart();calcSell();renderSellTable();
  initSaleMap();setTimeout(()=>{if(saleMapObj){saleMapObj.invalidateSize();drawSaleMap();}},100);}
 function renderSellKpi(r7,r14,r30){const buy=bOrg(FLT,30),mar=r30-buy,pct=r30?mar/r30*100:0;const d7=r7-r30,d14=r14-r30;const ar=d=>d>=0?'▲':'▼',cl=d=>d>=0?'up':'down';
@@ -565,16 +569,17 @@ function renderSellCenters(){document.getElementById('sellCenters').innerHTML=SM
   return `<button style="padding:5px 10px;border-radius:7px;border:1px solid ${on?SCOL[m.code]:'var(--line)'};background:${on?'transparent':'var(--panel2)'};color:${on?SCOL[m.code]:'var(--mut)'};font-weight:500;font-size:12px;cursor:pointer" onclick="toggleSellMarket('${m.code}')">${on?'●':'○'} ${m.name}</button>`;}).join('');}
 function toggleSellMarket(code){SSEL.markets[code]=!SSEL.markets[code];renderSellCenters();drawSellChart();}
 let sellCh;
-function drawSellChart(){const codes=SMKT.filter(m=>SSEL.markets[m.code]);const comp=sOrgSeries(FLT,30).slice(-TF);const labels=tfLabels(comp.length);
- const ds=[{label:'Company avg',data:comp,borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:3}];
- codes.forEach(m=>ds.push({label:m.name,data:sSeries(m.code,FLT,30).slice(-TF),borderColor:SCOL[m.code],backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:1.5}));
+function drawSellChart(){const codes=SMKT.filter(m=>SSEL.markets[m.code]);let labels,comp,per;
+ if(LIVESELLS){const w=Math.max(1,Math.round(TF/7));labels=LIVESELLS.weeks;comp=smooth(LIVESELLS.company,w);per=code=>smooth(LIVESELLS.byMarket[code]||[],w);}else{comp=sOrgSeries(FLT,TF);labels=tfLabels(comp.length);per=code=>sSeries(code,FLT,TF);}
+ const ds=[{label:'Company avg',data:comp,borderColor:'#F7F8F8',backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:3,spanGaps:true}];
+ codes.forEach(m=>ds.push({label:m.name,data:per(m.code),borderColor:SCOL[m.code],backgroundColor:'transparent',fill:false,tension:.2,pointRadius:0,borderWidth:1.5,spanGaps:true}));
  const ctx=document.getElementById('sellChart');if(sellCh)sellCh.destroy();
  sellCh=new Chart(ctx,{type:'line',data:{labels,datasets:ds},options:{plugins:{legend:{display:true,labels:{color:'#9fb0c0',boxWidth:12,usePointStyle:true,font:{size:11}}},tooltip:{mode:'index',intersect:false,callbacks:{title:i=>i[0].label,label:x=>x.dataset.label+': Rs '+(+x.raw).toFixed(1)}}},scales:{x:{display:false},y:{position:'right',grid:{color:'#1c2530'},ticks:{color:'#7C8B9A',callback:v=>'Rs '+v}}},interaction:{mode:'index',intersect:false}}});}
 function renderSellTable(){const buy=bOrg(FLT,30);
  const rows=SMKT.map(m=>{const r30=sRoll(m.code,FLT,30),r14=sRoll(m.code,FLT,14),r7=sRoll(m.code,FLT,7);return {code:m.code,name:m.name,r7,r14,r30,mar:r30-buy};}).sort((a,b)=>b.r30-a.r30);const mx=Math.max(...rows.map(r=>r.r30)),mn=Math.min(...rows.map(r=>r.r30));
  document.getElementById('sellTable').innerHTML=rows.map((r,i)=>`<tr${r.code===SSEL.own?' style="background:rgba(94,106,210,.14)"':''}><td>${i+1}</td><td><span style="color:${SCOL[r.code]}">●</span> ${r.name}${i===0?' <span class="badge">BEST</span>':''}</td><td class="mono">${money1(r.r7)}</td><td class="mono">${money1(r.r14)}</td><td class="mono"><b>${money1(r.r30)}</b></td><td class="mono ${r.mar>=0?'up':'down'}">${money1(r.mar)}</td><td style="width:80px"><div class="bar"><span style="width:${Math.min(100,Math.max(4,(r.r30-mn)/((mx-mn)||1)*100))}%;background:${SCOL[r.code]}"></span></div></td></tr>`).join('');}
 function calcSell(){const mcode=document.getElementById('skMarket').value;if(mcode)SSEL.own=mcode;
- const sale=parseFloat(document.getElementById('skPrice').value)||0,vol=parseFloat(document.getElementById('skVol').value)||0;
+ const sale=parseFloat(document.getElementById('skPrice').value)||0,lpd=parseFloat(document.getElementById('skVol').value)||0,days=parseFloat(document.getElementById('skDays').value)||30,vol=lpd*days;
  const useOpex=document.getElementById('skOpex').checked,useLogi=document.getElementById('skLogi').checked,logiVal=parseFloat(document.getElementById('skLogiVal').value)||0;
  const pool=sPool(30);const cur=pool.lit?pool.amt/pool.lit:0;const nw=(pool.amt+sale*vol)/((pool.lit+vol)||1);
  const src=CENTERS.map(c=>{let cost=bNow(c.code,FLT);if(useOpex)cost+=opexVarPerL(c);if(useLogi)cost+=logiVal;return {name:c.name,code:c.code,cost,mar:sale-cost};}).sort((a,b)=>b.mar-a.mar);
@@ -588,13 +593,13 @@ function calcSell(){const mcode=document.getElementById('skMarket').value;if(mco
  const vd=dealVerdict(cur,nw,'sell');let reason='';if(sale<ADMIN.sellFloor){vd.cls='bad';vd.label='BAD DEAL';reason=' · below floor '+money1(ADMIN.sellFloor);}
  const arrow=nw>cur?'▲':(nw<cur?'▼':'▪'),word=nw>cur?'raises':(nw<cur?'lowers':'holds'),signed=(nw>=cur?'+':'-')+'Rs '+Math.abs(nw-cur).toFixed(2);
  const el=document.getElementById('skVerdict');el.className='deal '+vd.cls;
- el.innerHTML=`<div class="dl">${vd.label}</div><div class="dm">${arrow} ${word} the 30-day sell avg to <b>${money1(nw)}</b> · ${signed} (${vd.pct.toFixed(2)}%)${reason}</div>`;
+ el.innerHTML=`<div class="dl">${vd.label}</div><div class="dm">${arrow} ${word} the 30-day sell avg to <b>${money1(nw)}</b> · ${signed} (${vd.pct.toFixed(2)}%)${reason}</div><div class="dm" style="opacity:.8">Break-even floor <b>${money1(cur)}/L</b> — sell above to lift the average</div>`;
  const topMkt=SMKT.map(m=>({name:m.name,r:sRoll(m.code,FLT,30)})).sort((a,b)=>b.r-a.r)[0];
  let sug=`Source from <b>${best.name}</b> → margin <b class="${best.mar>=0?'up':'down'}">${money1(best.mar)}/L</b> (vs ${worst.name} ${money1(worst.mar)}).`;
  if(useLogi)sug+=` Drop logistics → <b>${money1(best.mar+logiVal)}/L</b>.`;
  if(useOpex)sug+=` Drop OpEx → <b>${money1(best.mar+opexVarPerL(CENTERS.find(c=>c.code===best.code)))}/L</b>.`;
  sug+=` Highest-priced market now: <b>${topMkt.name} (${money1(topMkt.r)})</b>.`;
- document.getElementById('skSugg').innerHTML=sug;
+ document.getElementById('skSugg').innerHTML='Deal ≈ <b>'+lpd.toLocaleString()+' L/day × '+days+'d = '+vol.toLocaleString()+' L</b>. Adds <b>'+lpd.toLocaleString()+' L/day</b> to ~'+Math.round(pool.lit/30).toLocaleString()+' L/day (+'+(lpd/((pool.lit/30)||1)*100).toFixed(0)+'% throughput).<br>'+sug;
  document.getElementById('srcBody').innerHTML=src.map((r,i)=>`<tr${i===0?' style="background:rgba(76,183,130,.10)"':''}><td>${i+1}</td><td>${r.name}${i===0?' <span class="badge">CHEAPEST</span>':''}</td><td class="mono">${money1(r.cost)}</td><td class="mono ${r.mar>=0?'up':'down'}">${money1(r.mar)}</td><td style="width:70px"><div class="bar"><span style="width:${Math.min(100,Math.max(4,r.mar/Math.max(...src.map(x=>x.mar),1)*100))}%;background:var(--up)"></span></div></td></tr>`).join('');}
 
 // ============ POST ============
@@ -677,6 +682,7 @@ document.getElementById('tf').addEventListener('click',e=>{if(!e.target.dataset.
 function setTF(v){TF=v;document.querySelectorAll('#tfBuy button,#tfSell button').forEach(b=>b.classList.toggle('on',+b.dataset.t===v));if(CURTAB==='buy')drawDeskChart();else if(CURTAB==='sell')drawSellChart();}
 document.getElementById('tfBuy').addEventListener('click',e=>{if(e.target.dataset.t)setTF(+e.target.dataset.t);});
 document.getElementById('tfSell').addEventListener('click',e=>{if(e.target.dataset.t)setTF(+e.target.dataset.t);});
+function setHZN(v){HZN=Math.max(1,parseFloat(v)||30);['hznBuy','hznSell','bkDays','skDays'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=HZN;});renderActive();}
 
 
 // ============ LIVE DATA (data.json from puller) ============
@@ -697,7 +703,7 @@ function applyLive(d){
  SDATA={};SVOL={};SMKT.forEach(m=>{SDATA[m.code]={};SVOL[m.code]={};TYPES.forEach(t=>{const h=m._t&&m._t[t];const p=h?m._t[t].price:m.base[t];const dv=h?Math.max(m._t[t].vol,1):0;SDATA[m.code][t]=flat(p);SVOL[m.code][t]=flat(dv);});});
  SEL.c=CENTERS[0].code;BKSEL.own=CENTERS[0].code;BKSEL.centers={};CENTERS.forEach(c=>BKSEL.centers[c.code]=true);
  SSEL.own=SMKT[0].code;SSEL.markets={};SMKT.forEach(m=>SSEL.markets[m.code]=true);COSTSEL=CENTERS[0].code;
- renderDealCenters();const sl=document.getElementById('skLogiVal');if(sl)sl.value=SMKT[0].logi;
+ LIVEBUYS=d.buy.series||null;LIVESELLS=d.sell.series||null;renderDealCenters();const sl=document.getElementById('skLogiVal');if(sl)sl.value=SMKT[0].logi;
  const lt=document.getElementById('liveTag');if(lt)lt.textContent=String.fromCharCode(9679)+' Live · '+(d.asOf||'ERP');
  renderActive();}
 
