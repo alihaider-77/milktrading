@@ -127,7 +127,7 @@ label{font-size:11px;color:var(--mut);font-weight:500;display:block;margin-botto
   <div class="main">
     <div class="topbar">
       <div><div class="ttl" id="ttl">Buying Desk</div><div class="sub" id="sub">One number: the company all-milk 30-day rolling buying price</div></div>
-      <div class="right"><span class="livedot"></span> Live · agents <b style="color:var(--ink)">7</b> <span>· 22 Aug 2026</span></div>
+      <div class="right"><span class="livedot"></span> <span id="liveTag">Demo data (seed)</span></div>
     </div>
     <div class="wrap">
 
@@ -385,7 +385,7 @@ label{font-size:11px;color:var(--mut);font-weight:500;display:block;margin-botto
 
 <script>
 // ============ SEED ============
-const CENTERS=[
+let CENTERS=[
  {code:"BHW",name:"Bhawana",lat:31.480,lng:72.653,base:{Buffalo:200,Cow:178,Mix:190},opex:1240000,vol:62000,fixPct:0.40},
  {code:"MHB",name:"Mahabali",lat:31.449,lng:72.223,base:{Buffalo:196,Cow:174,Mix:188},opex:980000,vol:48000,fixPct:0.45},
  {code:"UBH",name:"Ubhaan",lat:31.644,lng:72.636,base:{Buffalo:194,Cow:172,Mix:186},opex:1520000,vol:84000,fixPct:0.35},
@@ -399,7 +399,7 @@ const SELLMKT=[
  {name:"Multan",lat:30.1575,lng:71.5249,price:252,vol:3000,logi:16},
  {name:"Gujranwala",lat:32.1877,lng:74.1945,price:255,vol:2500,logi:12},
 ];
-const SMKT=[
+let SMKT=[
  {code:"LHR",name:"Lahore",lat:31.5204,lng:74.3587,base:{Buffalo:268,Cow:238,Mix:252},vol:9000,logi:14},
  {code:"FSD",name:"Faisalabad",lat:31.4187,lng:73.0791,base:{Buffalo:256,Cow:230,Mix:244},vol:6500,logi:9},
  {code:"SGD",name:"Sargodha",lat:32.0836,lng:72.6711,base:{Buffalo:250,Cow:224,Mix:238},vol:4000,logi:4},
@@ -409,18 +409,18 @@ const SMKT=[
 ];
 const TYPES=["Buffalo","Cow","Mix"];
 const TSHARE={Buffalo:0.55,Cow:0.30,Mix:0.15};
-const CCOL={BHW:'#5E6AD2',MHB:'#4CB782',UBH:'#E2B340',TRS:'#EB5757'};
-const SCOL={LHR:'#5E6AD2',FSD:'#4CB782',SGD:'#E2B340',ISB:'#B08CFF',MUL:'#F2994A',GUJ:'#56CCF2'};
+let CCOL={BHW:'#5E6AD2',MHB:'#4CB782',UBH:'#E2B340',TRS:'#EB5757'};
+let SCOL={LHR:'#5E6AD2',FSD:'#4CB782',SGD:'#E2B340',ISB:'#B08CFF',MUL:'#F2994A',GUJ:'#56CCF2'};
 const custom={BHW:[["Chilling",5],["Transport",8]],MHB:[["Chilling",5],["Transport",6]],UBH:[["Chilling",4],["Transport",10],["Wastage",3]],TRS:[["Chilling",6],["Transport",7]]};
 // good/bad thresholds are on how much a lot moves the company 30-day average (favourable vs adverse), in Rs and %
 const ADMIN={buyCeil:205,sellFloor:250,goodAbs:0.30,goodPct:0.12,badAbs:0.30,badPct:0.12};
 
 function series(base,days){let a=[],p=base-6;for(let i=0;i<days;i++){p+=(Math.sin(i/3)*1.4)+((Math.random()-0.48)*3);p=Math.max(base-14,Math.min(base+8,p));a.push(+p.toFixed(1));}a[a.length-1]=base;return a;}
-const DATA={};CENTERS.forEach(c=>{DATA[c.code]={};TYPES.forEach(t=>DATA[c.code][t]=series(c.base[t],90));});
-const MKT={};CENTERS.forEach(c=>{MKT[c.code]={};TYPES.forEach(t=>{MKT[c.code][t]=DATA[c.code][t].map((v,i)=>+(v+2.5+Math.sin(i/2.5)*2.2+Math.random()*4).toFixed(1));});});
-const VOL={};CENTERS.forEach(c=>{VOL[c.code]={};TYPES.forEach(t=>{const d=c.vol/30*TSHARE[t];VOL[c.code][t]=DATA[c.code][t].map(()=>Math.round(d*(0.8+Math.random()*0.4)));});});
-const SDATA={};SMKT.forEach(m=>{SDATA[m.code]={};TYPES.forEach(t=>SDATA[m.code][t]=series(m.base[t],90));});
-const SVOL={};SMKT.forEach(m=>{SVOL[m.code]={};TYPES.forEach(t=>{const d=m.vol/30*TSHARE[t];SVOL[m.code][t]=SDATA[m.code][t].map(()=>Math.round(d*(0.8+Math.random()*0.4)));});});
+let DATA={};CENTERS.forEach(c=>{DATA[c.code]={};TYPES.forEach(t=>DATA[c.code][t]=series(c.base[t],90));});
+let MKT={};CENTERS.forEach(c=>{MKT[c.code]={};TYPES.forEach(t=>{MKT[c.code][t]=DATA[c.code][t].map((v,i)=>+(v+2.5+Math.sin(i/2.5)*2.2+Math.random()*4).toFixed(1));});});
+let VOL={};CENTERS.forEach(c=>{VOL[c.code]={};TYPES.forEach(t=>{const d=c.vol/30*TSHARE[t];VOL[c.code][t]=DATA[c.code][t].map(()=>Math.round(d*(0.8+Math.random()*0.4)));});});
+let SDATA={};SMKT.forEach(m=>{SDATA[m.code]={};TYPES.forEach(t=>SDATA[m.code][t]=series(m.base[t],90));});
+let SVOL={};SMKT.forEach(m=>{SVOL[m.code]={};TYPES.forEach(t=>{const d=m.vol/30*TSHARE[t];SVOL[m.code][t]=SDATA[m.code][t].map(()=>Math.round(d*(0.8+Math.random()*0.4)));});});
 
 const money=n=>"Rs "+Math.round(n).toLocaleString();
 const money1=n=>"Rs "+(+n).toFixed(1);
@@ -673,6 +673,31 @@ document.getElementById('fltBuy').addEventListener('click',e=>{if(e.target.datas
 document.getElementById('fltSell').addEventListener('click',e=>{if(e.target.dataset.f)setFlt(e.target.dataset.f);});
 document.getElementById('tf').addEventListener('click',e=>{if(!e.target.dataset.d)return;SEL.d=+e.target.dataset.d;document.querySelectorAll('#tf button').forEach(b=>b.classList.toggle('on',b===e.target));renderChart();});
 
+
+// ============ LIVE DATA (data.json from puller) ============
+const LIVECOORD={'LOC-000532':[31.449,72.223],'LOC-000784':[31.480,72.653],'LOC-000503':[31.644,72.636],'LOC-000526':[31.608,72.592],'LOC-000356':[31.72,73.10],'LOC-000816':[31.95,72.90]};
+function fixxy(code,lat,lng){if(LIVECOORD[code])return LIVECOORD[code];if(!lat||!lng||Math.abs(lat-30.3728)<0.02)return[31.6,72.6];return[lat,lng];}
+function flat(v){v=+v||0;return Array.from({length:90},()=>+v.toFixed(1));}
+function applyLive(d){
+ const PAL=['#5E6AD2','#4CB782','#E2B340','#EB5757','#B08CFF','#F2994A','#56CCF2','#8A8F98'];CCOL={};SCOL={};
+ CENTERS=d.buy.centres.map((c,i)=>{const xy=fixxy(c.code,c.lat,c.lng);const base={};let vd=0;
+   TYPES.forEach(t=>base[t]=c.types[t]?c.types[t].price:(c.types.Mix?c.types.Mix.price:(c.types.Cow?c.types.Cow.price:(c.types.Buffalo?c.types.Buffalo.price:150))));
+   TYPES.forEach(t=>{if(c.types[t])vd+=c.types[t].vol;});const volm=Math.max(vd,50)*30;
+   CCOL[c.code]=PAL[i%PAL.length];return {code:c.code,name:(c.name||c.code).replace('MCC ',''),lat:xy[0],lng:xy[1],base,opex:Math.round((((c.opexVarPerL||0)+(c.opexFixedPerL||0))||10)*volm),vol:volm,fixPct:(((c.opexVarPerL||0)+(c.opexFixedPerL||0))>0?(c.opexFixedPerL||0)/((c.opexVarPerL||0)+(c.opexFixedPerL||0)):0),_t:c.types};});
+ SMKT=d.sell.markets.map((m,i)=>{const xy=fixxy(m.code,m.lat,m.lng);const base={};let vd=0;
+   TYPES.forEach(t=>base[t]=m.types[t]?m.types[t].price:(m.types.Mix?m.types.Mix.price:167));
+   TYPES.forEach(t=>{if(m.types[t])vd+=m.types[t].vol;});const volm=Math.max(vd,50)*30;
+   SCOL[m.code]=PAL[i%PAL.length];return {code:m.code,name:(m.name||m.code).replace('MCC ',''),lat:xy[0],lng:xy[1],base,vol:volm,logi:10,_t:m.types};});
+ DATA={};VOL={};MKT={};CENTERS.forEach(c=>{DATA[c.code]={};VOL[c.code]={};MKT[c.code]={};TYPES.forEach(t=>{const h=c._t&&c._t[t];const p=h?c._t[t].price:c.base[t];const dv=h?Math.max(c._t[t].vol,1):0;DATA[c.code][t]=flat(p);VOL[c.code][t]=flat(dv);MKT[c.code][t]=flat(p+3);});});
+ SDATA={};SVOL={};SMKT.forEach(m=>{SDATA[m.code]={};SVOL[m.code]={};TYPES.forEach(t=>{const h=m._t&&m._t[t];const p=h?m._t[t].price:m.base[t];const dv=h?Math.max(m._t[t].vol,1):0;SDATA[m.code][t]=flat(p);SVOL[m.code][t]=flat(dv);});});
+ SEL.c=CENTERS[0].code;BKSEL.own=CENTERS[0].code;BKSEL.centers={};CENTERS.forEach(c=>BKSEL.centers[c.code]=true);
+ SSEL.own=SMKT[0].code;SSEL.markets={};SMKT.forEach(m=>SSEL.markets[m.code]=true);COSTSEL=CENTERS[0].code;
+ renderDealCenters();const sl=document.getElementById('skLogiVal');if(sl)sl.value=SMKT[0].logi;
+ const lt=document.getElementById('liveTag');if(lt)lt.textContent=String.fromCharCode(9679)+' Live · '+(d.asOf||'ERP');
+ renderActive();}
+
 renderDealCenters();renderCostCenter();calcCities();document.getElementById('skLogiVal').value=SMKT[0].logi;renderBuy();
+fetch('data.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){if(d&&d.buy&&d.sell&&d.buy.centres&&d.buy.centres.length)applyLive(d);}).catch(function(){});
+
 </script>
 </body></html>

@@ -1,0 +1,183 @@
+{
+ "asOf": "2026-09-08 14:20 UTC",
+ "source": "Frappe Cloud replica \u2014 Milk Pricing/Dispatch (buy) + Milk Sale (sell)",
+ "buy": {
+  "centres": [
+   {
+    "code": "LOC-000356",
+    "name": "MCC Kachain (Kala Bali)",
+    "lat": 30.372875188,
+    "lng": 69.301757813,
+    "types": {
+     "Mix": {
+      "price": 145.0,
+      "vol": 200
+     }
+    }
+   },
+   {
+    "code": "LOC-000503",
+    "name": "MCC Ubhaan",
+    "lat": 30.372875188,
+    "lng": 69.301757813,
+    "types": {
+     "Buffalo": {
+      "price": 153.5,
+      "vol": 57
+     },
+     "Cow": {
+      "price": 153.5,
+      "vol": 53
+     }
+    },
+    "opexVarPerL": 14.58,
+    "opexFixedPerL": 32.44
+   },
+   {
+    "code": "LOC-000526",
+    "name": "MCC Tahli Rang Shah",
+    "lat": 31.607706,
+    "lng": 72.592326,
+    "types": {
+     "Buffalo": {
+      "price": 153.5,
+      "vol": 20
+     },
+     "Cow": {
+      "price": 153.5,
+      "vol": 145
+     }
+    },
+    "opexVarPerL": 5.92,
+    "opexFixedPerL": 16.21
+   },
+   {
+    "code": "LOC-000532",
+    "name": "MCC Mahabali",
+    "lat": 30.372875188,
+    "lng": 69.301757813,
+    "types": {
+     "Buffalo": {
+      "price": 153.5,
+      "vol": 229
+     },
+     "Cow": {
+      "price": 153.5,
+      "vol": 1119
+     }
+    },
+    "opexVarPerL": 10.31,
+    "opexFixedPerL": 3.24
+   },
+   {
+    "code": "LOC-000784",
+    "name": "MCC Bhawana",
+    "lat": 30.372875188,
+    "lng": 69.301757813,
+    "types": {
+     "Buffalo": {
+      "price": 153.5,
+      "vol": 94
+     },
+     "Cow": {
+      "price": 153.5,
+      "vol": 172
+     }
+    },
+    "opexVarPerL": 2.36,
+    "opexFixedPerL": 38.12
+   },
+   {
+    "code": "LOC-000816",
+    "name": "MCC Chak 157NB",
+    "lat": 30.3753,
+    "lng": 69.3451,
+    "types": {
+     "Buffalo": {
+      "price": 153.5,
+      "vol": 200
+     },
+     "Cow": {
+      "price": 153.5,
+      "vol": 200
+     },
+     "Mix": {
+      "price": 153.5,
+      "vol": 200
+     }
+    }
+   }
+  ],
+  "company30": 152.87
+ },
+ "sell": {
+  "markets": [
+   {
+    "code": "LOC-000503",
+    "name": "MCC Ubhaan",
+    "lat": 30.372875188,
+    "lng": 69.301757813,
+    "types": {
+     "Mix": {
+      "price": 167.0,
+      "vol": 22
+     }
+    }
+   },
+   {
+    "code": "LOC-000526",
+    "name": "MCC Tahli Rang Shah",
+    "lat": 31.607706,
+    "lng": 72.592326,
+    "types": {
+     "Mix": {
+      "price": 167.0,
+      "vol": 50
+     }
+    }
+   },
+   {
+    "code": "LOC-000532",
+    "name": "MCC Mahabali",
+    "lat": 30.372875188,
+    "lng": 69.301757813,
+    "types": {
+     "Mix": {
+      "price": 160.7,
+      "vol": 486
+     }
+    }
+   },
+   {
+    "code": "LOC-000784",
+    "name": "MCC Bhawana",
+    "lat": 30.372875188,
+    "lng": 69.301757813,
+    "types": {
+     "Mix": {
+      "price": 167.0,
+      "vol": 80
+     }
+    }
+   },
+   {
+    "code": "LOC-000816",
+    "name": "MCC Chak 157NB",
+    "lat": 30.3753,
+    "lng": 69.3451,
+    "types": {
+     "Mix": {
+      "price": 167.0,
+      "vol": 56
+     }
+    }
+   }
+  ],
+  "company30": 167.0
+ },
+ "notes": {
+  "buying": "Rate = Milk Pricing base_price (TS-based master), volume-weighted by Milk Dispatch litres (last 90d). No historical price series yet, so buying trend is flat until price history is captured.",
+  "market_competitor": "Not in ERP \u2014 agent-posted; left to the app.",
+  "opex": "opexPerL = expense GL on the MCC cost centre EXCLUDING Cost of Goods Sold, over last 90d, / dispatched litres. Total operating opex (fixed+variable together) until accounts are tagged fixed/variable."
+ }
+}
